@@ -829,6 +829,8 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 
 [CC BY-NC-ND 4.0][cc_byncnd40]
 
+![Developed by human](human_dev.gif)
+
 [a64_opcodes]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions?lang=en
 [a64_syscalls]: https://arm64.syscall.sh/
 [a64_adr]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/ADR--Form-PC-relative-address-?lang=en
