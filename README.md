@@ -9,7 +9,7 @@ Raspberry Pi 3 and newer).
   x86 Desktop Linux can emulate an ARM CPU. Install [QEMU][qemu_dl], then
   download [Alpine Linux aarch64 mini root filesystem][alpine_dl] and extract
   the archive. Run `sudo systemd-nspawn -D /path/to/alpine/rootfs /bin/ash`,
-  then run `apk upgrade && apk add build-base` inside the container to install
+  then run `apk add build-base` inside the container to install
   GCC and the rest of the toolchain.
 
   Linux kernel [binfmt][binfmt_misc] interface will detect the architecture of
