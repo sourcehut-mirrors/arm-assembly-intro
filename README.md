@@ -33,7 +33,7 @@ add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
 ```
 
 `x0`, `x1`, `x2` ... `x30` are places where we store data, called registers.
-`mov` places `7` into `x1` register, the hash sign inicates 1 is a number.
+`mov` places `7` into `x1` register, the hash sign indicates 1 is a number.
 `add` performs the addition, it adds 10 to the contents of `x1` and saves the
 result in `x2`.
 
@@ -210,7 +210,7 @@ _start:
     str x0, [x1] // No segfault
 
     mov x8, #93
-    mov x0, x2
+    mov x0, #0
     svc #0 // Exit
 
 .section .data // Not .rodata
