@@ -768,33 +768,37 @@ CPU: the instruction sets are different.
 **Q: What is assembly/assembler?**
 
 A: Assembly is a set of direct CPU instructions such as [ARM][a64_opcodes] or
-x86.
+x86 (also known as "assembly language").
 
 A: An assembler is a computer program that takes handwritten assembly files as
 input and encodes them in binary format.
 
 **Q: What are 32-bit and 64-bit ARM CPUs?**
 
-A: These are two flavors of the ARM ISA. The numbers refer to the register
-sizes, which in turn affect throughput and the amount of addressable memory;
-there are instruction differences as well. *All this time I have been talking
-about 64-bit ARM*. An ARM CPU may support both execution modes, known as
-AArch32 and AArch64, and be able to switch between the two.
+A: Colloquial terms for ARM CPUs capable of executing A32 and A64 instruction
+sets.
 
 **Q: What are A32, A64, T32, Thumb, and Thumb-2?**
 
-A: "A32" and "A64" denote 32-bit and 64-bit variants of ARM ISA. All A32 and
-A64 instructions are 32 bit wide, while in Thumb mode instructions are 16 bit
-wide. Thumb-2 allows mixed instruction sizes. T32 is an alias for Thumb-2.
-Thumb modes are only avaialble in AArch32 mode. Thumb modes is desirable in
+A: ["A32" and "A64" denote 32-bit and 64-bit variants of ARM ISA, the numbers
+refer to *register* sizes.][arm_execstates] Register sizes affect throughput
+(performance) and the amount of addressable memory (bigger registers fit more
+addresses). [All A32 and A64 *instructions* are 32 bit wide][arm_execstates],
+while [in Thumb mode they are 16 bit wide. Thumb-2 allows mixed instruction
+sizes.][arm_thumb] T32 is an alias for Thumb-2. [An ARM CPU executing A64
+instructions operates in AArch64 execution mode, while and ARM CPU executing
+A32 or T32 instructions operates in AArch32 execution mode. An ARM CPU may
+support multiple execution modes.][arm_execstates] Thumb mode is desirable in
 microcontrollers, where flash storage is limited.
 
 **Q: What are Armv6-M, Armv7-M, Armv8-A, and the like?**
 
-A: The numbers refer to ISA version; higher means newer. A, R, M at the end
-refer to the ISA profile: A means high performance, M means low power, R means
-real-time. The A profile is usually meant to run a full-scale operating
-system, while the M profile is usually meant for embedded microcontrollers.
+A: [The numbers refer to ISA version; higher means newer][arm_nomenclature].
+[A, R, M at the end refer to the ISA profile: A means high performance, M means
+low power, R means real-time. The A profile is meant to run a full-scale
+operating system; the M profile is meant for embedded microcontrollers; the R
+profile is equiped with additional fault-tolerance features and is found in the
+aviation and automotive industries.][arm_isaflavours]
 
 **Q: What is ARM Cortex?**
 
@@ -804,11 +808,16 @@ cache sizes, etc.; think of it as a CPU core blueprint. [Raspberry Pi 5 comes
 with four Cortex-A76 cores][rpi5_databrief]. The A refers to the ISA profile
 and the number usually reflects performance relative to the other Cortex cores.
 
+**Q: Does ARM glossary exist?**
+
+A: [Yes, it does.][arm_glossary]
+
 **Q: Why does GDB show cryptic instructions instead of `.ascii` string in
 `.data?` section?**
 
 A: Disassembler does not distinguish between code and data; it tries to
-interpret data sections as code. `x/12c 0x4000078` GDB command displays 12
+interpret data sections as code. There is a way to ask GDB disassembler to
+interpret a memory region as data: `x/12c 0x4000078` command displays 12
 consecutive characters starting from `0x4000078`.
 
 **Q: How do I ask GCC to generate the assembler code from C?**
@@ -831,22 +840,27 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 
 ![Developed by human](human_dev.gif)
 
-[a64_opcodes]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions?lang=en
-[a64_syscalls]: https://arm64.syscall.sh/
 [a64_adr]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/ADR--Form-PC-relative-address-?lang=en
 [a64_adrp]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en
 [a64_cbz]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/CBZ--Compare-and-branch-on-zero-?lang=en
-[gcc_man]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
 [a64_ldrstr]: https://developer.arm.com/documentation/102374/0103/Loads-and-stores---addressing
-[a64_stackusage]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/using-the-stack-in-aarch64-implementing-push-and-pop
+[a64_opcodes]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions?lang=en
 [a64_pcs]: https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst#6the-base-procedure-call-standard
-[rpi5_databrief]: https://pip.raspberrypi.com/documents/RP-008348-DS-raspberry-pi-5-product-brief.pdf
-[arm_archlearn]: https://www.arm.com/architecture/learn-the-architecture
-[stm32_nucleo]: https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html
-[arm_docs]: https://developer.arm.com/
-[cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
-[make_guide]: https://makefiletutorial.com/
-[arm_learnpaths]: https://learn.arm.com/
-[binfmt_misc]: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
+[a64_stackusage]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/using-the-stack-in-aarch64-implementing-push-and-pop
+[a64_syscalls]: https://arm64.syscall.sh/
 [alpine_dl]: https://alpinelinux.org/downloads/
+[arm_archlearn]: https://www.arm.com/architecture/learn-the-architecture
+[arm_docs]: https://developer.arm.com/
+[arm_execstates]: https://developer.arm.com/documentation/102374/0103/Instruction-sets-in-the-Arm-architecture?lang=en
+[arm_glossary]: https://developer.arm.com/documentation/105565/200
+[arm_isaflavours]: https://www.arm.com/architecture/cpu
+[arm_learnpaths]: https://learn.arm.com/
+[arm_nomenclature]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/arm-fundamentals-introduction-to-understanding-arm-processors
+[arm_thumb]: https://developer.arm.com/documentation/ddi0210/c/CACBCAAE
+[binfmt_misc]: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
+[cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
+[gcc_man]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
+[make_guide]: https://makefiletutorial.com/
 [qemu_dl]: https://www.qemu.org/download/#linux
+[rpi5_databrief]: https://pip.raspberrypi.com/documents/RP-008348-DS-raspberry-pi-5-product-brief.pdf
+[stm32_nucleo]: https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html
