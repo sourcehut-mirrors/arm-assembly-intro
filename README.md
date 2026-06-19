@@ -92,6 +92,10 @@ mov x0, x2
 svc #666 // #666 has no effect, because Linux ignores this value.
          // Even thought Linux ignores it, it has to be there as it is part of the instruction
          // Other operating systems may somehow react to it.
+
+// FOR ANDROID USERS:
+// THE ABOVE CODE WILL NOT WORK IN TERMUX, BECAUSE IT LACKS `_start` SYMBOL.
+// READ FURTHER DOWN FOR DETAILS.
 ```
 
 Linux syscalls and their arguments are listed in [syscalls(2)][man_syscalls2],
