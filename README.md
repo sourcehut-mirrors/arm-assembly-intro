@@ -10,9 +10,9 @@ Raspberry Pi 3 and newer).
   code in this article.
 
   Install [Termux][termux_android], [configure SSH][termux_ssh] so you can
-  login from desktop computer, run `pkg install -y clang binutils`.
-
-  You can proceed with the phone if `lscpu | head -n2` output looks like that:
+  login from desktop computer, run `pkg install -y clang binutils`. You can
+  proceed with the phone if `lscpu | head -n2` output in Termux looks like
+  that:
 
   ```
   Architecture:                            aarch64
@@ -94,9 +94,9 @@ svc #666 // #666 has no effect, because Linux ignores this value.
          // Other operating systems may somehow react to it.
 ```
 
-Linux syscalls and their arguments are listed at
-[arm64.syscall.sh][a64_syscalls] Follow the link and try to find the above exit
-syscall, verify the arguments.
+Linux syscalls and their arguments are listed in [syscalls(2)][man_syscalls2],
+but you may find [arm64.syscall.sh][a64_syscalls] more convenient. Follow the
+link and try to find the above exit syscall; verify the arguments.
 
 Compile and run the program again, it no longer crashes. Run `echo $?` to see
 the exit code is indeed 17.
@@ -297,7 +297,7 @@ than 3rd parties.
 
 # Compiler & Assembler
 
-From [GCC compiler man page][gcc_man]:
+From [GCC compiler man page][man_gcc1]:
 
 ```
 When you invoke GCC, it normally does preprocessing, compilation, assembly and
@@ -308,11 +308,9 @@ That means when you invoke `gcc /path/to/program.c`, GCC runs 4 programs in
 sequence: preprocessor, compiler, assembler, and linker. Preprocessor edits C
 code (e.g. resolves `#ifdef`s), compiler rewrites C into assembly, assembler
 encodes the assembly instructions in binary format, and the linker combines
-object files into an executable.
-
-Assembly code does not need compilation; instead, the assembler has to assemble
-it. In other words, there is no need to invoke GCC, you can run the assembler
-and linker manually:
+object files into an executable. Assembly code does not need preprocessing and
+compilation. In other words, there is no need to invoke GCC; you can run the
+assembler and linker manually:
 
 ```sh
 as -g -o helloworld.o helloworld.s
@@ -349,23 +347,23 @@ address, and writes the result to the destination register.
 ```
 
 PC is Program Counter, it is a register that holds the address of the next
-instruction to be executed. An immediate value is a constant. During execution
-this instruction reads the current PC value and adds a constant to it. This
-constant is the *distance* in bytes to the given address from the current
-instruction (PC value).
+instruction to be executed. An immediate value is a literal (constant). During
+execution this instruction reads the current PC value and adds the immediate to
+it. This immediate is the *distance* in bytes to the given address from the
+current instruction (PC value).
 
 If the assembler encodes the absolute memory address, the code must be loaded
 at that address every time it is executed; if you move the code, the fixed
 absolute address no longer points to the data.
 
-`adr` reads PC value and adds the distance to 'message' in bytes. the assembler
-does not bake in the absolute 'message' address, it bakes the *distance* from
-`adr` to message into the binary:
+`adr` reads PC value and adds the distance to `message` in bytes. the assembler
+does not bake in the absolute `message` address, it bakes the *distance* from
+`adr` to `message` into the binary:
 
 ```asm
 // ...
-	// Add the offset, the distance to message label, to the current PC value
-	// to compute the absolute message label address at run time.
+    // Add the offset, the distance to message label, to the current PC value
+    // to compute the absolute message label address at run time.
 	adr x1, message
 	// ...
 
@@ -394,15 +392,16 @@ run
 ...
 ```
 
-Every time you invoke `run`, notice how memory layout changes but the code is
-still able to reach the data. This is precisely because the encoded `adr`
-instruction stores the distance—not location—from `adr` (from PC) to the data.
+Every time you invoke `run`, notice how the memory layout changes but the code
+is still able to reach the data. This is precisely because the encoded `adr`
+instruction stores the distance—not the location—from `adr` (from PC) to the
+data.
 
-Consider [`adr` encoding][a64_adr], 21 bytes `immlo:immhi` are used to
-encode the offset in bytes, that gives +/-1MiB range away from PC; too little.
-[`adrp` instruction][a64_adrp] allows PC-relative addressing +/-4GiB. `adrp`
-subdivides memory into 4KiB regons—called pages—and encodes the distance in the
-amount of 4KiB pages (not bytes, like `adr`):
+Consider [`adr` encoding][a64_adr], 21 bytes `immlo:immhi` are used to encode
+the offset in bytes, which gives +/-1MiB range away from PC; too little
+sometimes. [`adrp` instruction][a64_adrp] allows PC-relative addressing
++/-4GiB. `adrp` subdivides memory into 4KiB regons—called pages—and encodes the
+distance in the amount of 4KiB pages (not bytes, like `adr`):
 
 ```asm
 // ...
@@ -418,6 +417,7 @@ amount of 4KiB pages (not bytes, like `adr`):
 	// offset is the number of 4K pages, multiplied by the page size gives
 	// the number of bytes. This page offset is baked into the binary.
 	adrp x1, message
+	// Page addresses are 4K apart and aligned: they end in 12 zeroes.
 
 	// x1 now points to the *page* where the data resides, now we have to
 	// find the data *within* that page. The 12 least significant bits
@@ -428,7 +428,7 @@ amount of 4KiB pages (not bytes, like `adr`):
 	// All in all message address may differ, but its distance from adrp
 	// does not.
 	add x1, x1, :lo12:message
-	// ...
+	// The aforementioned page address alignment is crucial for this to work.
 
 .section .rodata
 message:
@@ -877,8 +877,9 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [arm_thumb]: https://developer.arm.com/documentation/ddi0210/c/CACBCAAE
 [binfmt_misc]: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
 [cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
-[gcc_man]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
 [make_guide]: https://makefiletutorial.com/
+[man_gcc1]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
+[man_syscalls2]: https://man.archlinux.org/man/syscalls.2
 [qemu_dl]: https://www.qemu.org/download/#linux
 [rpi5_databrief]: https://pip.raspberrypi.com/documents/RP-008348-DS-raspberry-pi-5-product-brief.pdf
 [stm32_nucleo]: https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html
