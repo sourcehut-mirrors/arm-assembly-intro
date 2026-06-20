@@ -50,10 +50,10 @@ add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
                  // x2 is now 17.
 ```
 
-`x0`, `x1`, `x2` ... `x30` are places where we store data, called registers.
-`mov` places `7` into `x1` register, the hash sign indicates 7 is a number.
-`add` performs the addition, it adds 10 to the contents of `x1` and saves the
-result in `x2`.
+`x0`, `x1`, `x2` ... `x30` are places where we store data, called general
+purpose registers. `mov` places `7` into `x1` register, the hash sign indicates
+7 is a number. `add` performs the addition, it adds 10 to the contents of `x1`
+and saves the result in `x2`.
 
 We say `mov`, `add` ... are [*opcodes*][a64_opcodes] followed by *operands*,
 e.g., `add` opcode is followed by three operands: `x2`, `x1`, and `#10`. An
@@ -797,30 +797,25 @@ input and encodes them in binary format.
 
 **Q: What are 32-bit and 64-bit ARM CPUs?**
 
-A: Colloquial terms for ARM CPUs capable of executing A32 and A64 instruction
-sets.
+A: Colloquial terms for ARM CPUs capable of executing A32 and A64 ISAs
+respectively.
 
-**Q: What are A32, A64, T32, Thumb, and Thumb-2?**
+**Q: What are A32, A64, T32, Thumb, Thumb-2, AArch32, AArch64, ARMv6-M, ARMv8-A?**
 
-A: ["A32" and "A64" denote 32-bit and 64-bit variants of ARM ISA, the numbers
-refer to *register* sizes.][arm_execstates] Register sizes affect throughput
-(performance) and the amount of addressable memory (bigger registers fit more
-addresses). [All A32 and A64 *instructions* are 32 bit wide][arm_execstates],
-while [in Thumb mode they are 16 bit wide. Thumb-2 allows mixed instruction
-sizes.][arm_thumb] T32 is an alias for Thumb-2. [An ARM CPU executing A64
-instructions operates in AArch64 execution mode, while and ARM CPU executing
-A32 or T32 instructions operates in AArch32 execution mode. An ARM CPU may
-support multiple execution modes.][arm_execstates] Thumb mode is desirable in
-microcontrollers, where flash storage is limited.
-
-**Q: What are Armv6-M, Armv7-M, Armv8-A, and the like?**
-
-A: [The numbers refer to ISA version; higher means newer][arm_nomenclature].
-[A, R, M at the end refer to the ISA profile: A means high performance, M means
-low power, R means real-time. The A profile is meant to run a full-scale
-operating system; the M profile is meant for embedded microcontrollers; the R
-profile is equiped with additional fault-tolerance features and is found in the
-aviation and automotive industries.][arm_isaflavours]
+A: A32, A64, and T32 are ARM ISAs. The numbers in A32 and A64 correspond to
+general purpose register (`x0` ... `x30` in A64) sizes. Bigger registers in A64
+imply greater throughput (performance) and more addressable memory (bigger
+registers fit more addresses). ISAs also define how instructions are encoded.
+Both A32 and A64 instructions are 32 bit wide, whereas T32 allows mixed 16 and
+32 bit instruction sizes. Thumb is a previous version of T32, and Thumb-2 is an
+alias for T32. T32 is desired in microcontrollers where flash storage
+(non-volatile memory) is limited. Terms like ARMv8-A are architecuters; they
+define (not only) a subset of an ISA. The letters A, R, and M at the end define
+the [architecture profile.][arm_isaprofiles] [A single ARM CPU may be able to
+execute instructions encoded in both A64 and A32. A CPU executing A64
+instructions operates in AArch64 execution state, while a CPU executing A32 or
+T32 instructions operates in AArch32.][arm_execstates] This whole time I have
+been talking about A64.
 
 **Q: What is ARM Cortex?**
 
@@ -828,7 +823,8 @@ A: Apart from the ISAs, ARM releases various CPU core specifications, or simply
 cores. ARM calls them Cortex cores. A core defines the ISA, its extensions,
 cache sizes, etc.; think of it as a CPU core blueprint. [Raspberry Pi 5 comes
 with four Cortex-A76 cores][rpi5_databrief]. The A refers to the ISA profile
-and the number usually reflects performance relative to the other Cortex cores.
+and the number usually reflects performance relative to the other Cortex cores
+(higher is faster).
 
 **Q: Does ARM glossary exist?**
 
@@ -873,19 +869,17 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [alpine_dl]: https://alpinelinux.org/downloads/
 [arm_archlearn]: https://www.arm.com/architecture/learn-the-architecture
 [arm_docs]: https://developer.arm.com/
-[arm_execstates]: https://developer.arm.com/documentation/102374/0103/Instruction-sets-in-the-Arm-architecture?lang=en
+[arm_execstates]: https://developer.arm.com/documentation/102412/0103/Execution-and-Security-states/Execution-states
 [arm_glossary]: https://developer.arm.com/documentation/105565/200
-[arm_isaflavours]: https://www.arm.com/architecture/cpu
+[arm_isaprofiles]: https://www.arm.com/architecture/cpu
 [arm_learnpaths]: https://learn.arm.com/
 [arm_nomenclature]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/arm-fundamentals-introduction-to-understanding-arm-processors
-[arm_thumb]: https://developer.arm.com/documentation/ddi0210/c/CACBCAAE
 [binfmt_misc]: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
 [cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
 [make_guide]: https://makefiletutorial.com/
 [man_gcc1]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
 [man_syscalls2]: https://man.archlinux.org/man/syscalls.2
 [qemu_dl]: https://www.qemu.org/download/#linux
-[rpi5_databrief]: https://pip.raspberrypi.com/documents/RP-008348-DS-raspberry-pi-5-product-brief.pdf
 [stm32_nucleo]: https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html
 [systemd_nspawn1]: https://man.archlinux.org/man/systemd-nspawn.1
 [termux_android]: https://termux.dev/en/
