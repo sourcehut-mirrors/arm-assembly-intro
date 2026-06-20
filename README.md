@@ -51,7 +51,7 @@ add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
 ```
 
 `x0`, `x1`, `x2` ... `x30` are places where we store data, called registers.
-`mov` places `7` into `x1` register, the hash sign indicates 1 is a number.
+`mov` places `7` into `x1` register, the hash sign indicates 7 is a number.
 `add` performs the addition, it adds 10 to the contents of `x1` and saves the
 result in `x2`.
 
@@ -93,7 +93,7 @@ svc #666 // #666 has no effect, because Linux ignores this value.
          // Even thought Linux ignores it, it has to be there as it is part of the instruction
          // Other operating systems may somehow react to it.
 
-// FOR ANDROID USERS:
+// FOR ANDROID USERS ONLY:
 // THE ABOVE CODE WILL NOT WORK IN TERMUX, BECAUSE IT LACKS `_start` SYMBOL.
 // READ FURTHER DOWN FOR DETAILS.
 ```
