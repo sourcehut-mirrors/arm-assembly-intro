@@ -1,10 +1,35 @@
+# Introduction
+
+Welcome to ARM assembly introduction for absolute beginners. This guide is
+meant to give you enough about ARM assembly programming for you to be able to
+figure out the rest yourself. This guide will not duplicate or try to
+substitute the official ARM documentation, but rather bridge the gap between
+beginners and the official sources. For instance, I will not talk about ARM
+SIMD programming because this topic is well covered by the official
+documentation. I will also not discuss things that are likely to change or
+become obsolete.
+
+Most of the concepts taught are not ARM-specific but apply to other
+architectures. ARM is chosen as an example ISA because it is ubiquitous,
+arguably the most relevant architecture at the time of writing, and likely to
+remain relevant for the foreseeable future.
+
+# Usage
+
+This entire article is about practice from the very beginning. Reading the text
+is not enough. I write as little as possible and provide examples to illustrate
+each point. You should read the words, run the code, study the code, adjust the
+code, break the code and—this is crucial—observe the error messages. "Breaking
+the code" implies doing anything obviously silly, which is entirely up to your
+imagination. I will provide examples of how that can be done later in the text.
+
 # Prerequisites
 
-Basic C and Linux knowledge is needed. If you can understand [this
-project][battnotify_repo] and you feel comfortable working with the terminal,
-that's enough.
+Basic C and Linux knowledge is needed. You know enough if you can understand
+[this project][battnotify_repo] and you feel comfortable working with the
+terminal.
 
-You also need any ARM computer with 64 bit Linux on board to run the code.
+You also need any ARM computer with 64-bit Linux on board to run the code.
 Single-board computers like Raspberry Pi 3 and newer will do; you can even use
 your Android smartphone, as these are powered by ARM CPUs.
 
@@ -37,29 +62,25 @@ the binary to be executed and hand it over to QEMU automatically; that is why
 you can chroot into an ARM rootfs.
 </details>
 
-# Usage
+# Basics
 
-It is vital that you run, adjust, and break every program in this article. Most
-of the concepts taught are not ARM-specific but apply to other architectures.
-
-# Introduction
-
-The simplest assembly program I can think of:
+This is how arithmetic works in ARM:
 
 ```asm
+// We add 10 to 7 and save the result.
 mov x1, #7       // Save 7 into register x1.
 add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
                  // x2 is now 17.
 ```
 
-`x0`, `x1`, `x2` ... `x30` are places where we store data, called general
-purpose registers. `mov` places `7` into `x1` register, the hash sign indicates
-7 is a number. `add` performs the addition, it adds 10 to the contents of `x1`
-and saves the result in `x2`.
+`x0`, `x1`, `x2` ... `x30` are places where we store data, very much like
+variables in C; they are called general purpose registers. `mov` places `7`
+into `x1` register, the hash sign indicates 7 is a number. `add` performs the
+addition, it adds 10 to the contents of `x1` and saves the result in `x2`.
 
-We say `mov`, `add` ... are [*opcodes*][a64_opcodes] followed by *operands*,
+We say `mov`, `add` ... are [opcodes][a64_opcodes] followed by operands,
 e.g., `add` opcode is followed by three operands: `x2`, `x1`, and `#10`. An
-opcode, together with its operands, forms an *instruction*. In practice, the
+opcode, together with its operands, forms an instruction. In practice, the
 terms "opcode" and "instruction" are interchangeable.
 
 Install GCC, save the code as `hello.s`, and compile it with `gcc -nostdlib
@@ -77,8 +98,14 @@ and then whatever random byte sequence happens to reside next in memory. This
 random byte sequence causes `illegal hardware instruction` error.
 
 To fix the crash, we have to terminate the execution at the end of the program.
-There is no exit opcode, we have to ask the operating system to do it for us
-(issue a syscall):
+There is no exit opcode, we have to ask the operating system to do it for us.
+The "exit" concept is nonexistent in assembly, because a CPU can only execute a
+particular list of instructions, a CPU cannot "exit" from anything. "Exit" has
+meaning to the OS: "take this process off the CPU's schedule." The same applies
+to things like file I/O, symlinks, chroot, dynamic memory allocation, etc.
+Whenever you ask something from the operating system, that means you are
+issuing a syscall (short for "system call"). Syscall #93 in Linux terminates
+the execution:
 
 ```asm
 mov x1, #7
@@ -118,12 +145,12 @@ prevent the guessing, add `_start:` where needed:
 
 ```asm
 _start:
-    mov x1, #7
-    add x2, x1, #10
+	mov x1, #7
+	add x2, x1, #10
 
-    mov x8, #93
-    mov x0, x2
-    svc #0
+	mov x8, #93
+	mov x0, x2
+	svc #0
 ```
 
 If you recompile and run, the error does not go away. This is because `_start`
@@ -131,62 +158,59 @@ has to be `.global` to be visible from outside of the program (to the OS):
 
 ```asm
 _start:
-    mov x1, #7
-    add x2, x1, #10
+	mov x1, #7
+	add x2, x1, #10
 
-    mov x8, #93
-    mov x0, x2
-    svc #0
+	mov x8, #93
+	mov x0, x2
+	svc #0
 
 .global _start
 ```
 
 Compile and run again, the warning goes away. To truly understand what this is
-all about, try to break things; e.g., try to move `.global _start` and see what
-happens.
+all about, try to break things; e.g., try to move `.global _start` or `_start:`
+and see what happens.
 
-Each register corresponds to a physical location within the CPU. There are 31
-`x0` .. `x30` 64 bit wide registers, which are too few to hold all the data.
-The general approach is to hold data in memory, load the needed parts into
-registers to perform computations on them, and store the result back in memory.
-In other words, ARM instructions do not process data in memory directly; you
-must load the data into the registers first.
+## Memory & Sections
 
-Here is a modest load-from-memory example:
+31 64-bit CPU registers are not enough to hold all the data, which
+is why we have memory. ARM instructions do not process data in memory directly;
+you must load the data into the registers first. Here is a modest
+load-from-memory example:
 
 ```asm
 .global _start
 _start: // Global, marks where execution begins.
-    mov x8, #93
-    ldr x0, exit_code // Load 8 bytes from where exit_code points to.
-    svc #0
+	mov x8, #93
+	ldr x0, exit_code // Load 8 bytes from where exit_code points to.
+	add x0, x0, #5    // We can now process it somehow, like add 5 to it.
+	svc #0
 
 // Label the place with allocated memory.
 exit_code: // Not global, used internally.
-    // .quad reserves 8 bytes in memory,
-    // other options will be explored further.
-    .quad 15 // Store decimal 15.
+	// .quad reserves 8 bytes in memory,
+	// other options will be explored later.
+	.quad 15 // Store decimal 15.
 ```
 
 Assembly code can be subdivided into sections that reside in different memory
-regions and have different constraints applied to them; for example, the data
-section cannot be executed, and the code section cannot be modified.
-
-Sectioned code example:
+regions and have different constraints applied to them; the data section cannot
+be executed, and the code section cannot be modified. Sectioned code example:
 
 ```asm
 // Executable code resides in .text
 .section .text
 .global _start
 _start:
-    mov x8, #93
-    ldr x0, exit_code
-    svc #0
+	mov x8, #93
+	ldr x0, exit_code
+	svc #0
 
 // Read-only data resides in .rodata
 .section .rodata
 exit_code:
-    .quad 15
+	.quad 15
 
 // Other sections will be explored further down.
 ```
@@ -198,23 +222,23 @@ Try to write into `.rodata` memory address to see the program crash:
 .section .text
 .global _start
 _start:
-    mov x0, #6
-    // Load the memory address mydata points to.
-    adr x1, mydata
+	mov x0, #6
+	// Load the memory address mydata points to.
+	adr x1, mydata
 
-    // Store x0 in memory where x1 points to.
-    //
-    // [] are a dereference operator,
-    // meaning take memory address stored in x1,
-    // and store x0 there.
-    str x0, [x1]
-    // ^ this str will result in segmentation fault.
+	// Store x0 in memory where x1 points to.
+	//
+	// [] are a dereference operator,
+	// meaning take memory address stored in x1,
+	// and store x0 there.
+	str x0, [x1]
+	// ^ this str will result in segmentation fault.
 
 
 // Read-only data resides in .rodata
 .section .rodata
 mydata:
-    .quad 15
+	.quad 15
 ```
 
 If you run the above code, it will crash due to `segmentation fault`, meaning
@@ -228,43 +252,43 @@ the section:
 .section .text
 .global _start
 _start:
-    mov x0, #6
-    adr x1, mydata
+	mov x0, #6
+	adr x1, mydata
 
-    str x0, [x1] // No segfault
+	str x0, [x1] // No segfault
 
-    mov x8, #93
-    mov x0, #0
-    svc #0 // Exit
+	mov x8, #93
+	mov x0, #0
+	svc #0 // Exit
 
 .section .data // Not .rodata
 mydata:
-    .quad 15
+	.quad 15
 ```
 
-`.data` section is initialized global/static variables, whereas `.bss`
-section holds *un*initialized global/static variables. `.bss` is a way to
-preallocate memory.
+`.data` section is for initialized memory, whereas `.bss` section is for
+uninitialized memory. `.bss` is a way to preallocate memory. These correspond
+to initialized and uninitialized global/static C variables.
 
 `.bss` section usage example:
 
 ```asm
-// ...
-  adr x1, buffer // Take buffer address.
-  mov x2, #0x41
-  str x2, [x1]   // Store x2 at [x1].
+	// ...
+	adr x1, buffer // Take buffer address.
+	mov x2, #0x41
+	str x2, [x1]   // Store x2 at [x1].
 
-  // ...
+	// ...
 
 .section .bss
 buffer:
-  .zero 8  // .allocate 8 byte in .bss (zero-initialized)
+	.zero 8  // .allocate 8 byte in .bss (zero-initialized)
 ```
 
 Unlike `.data.`, `.bss` section cannot be given initial value except 0.
 
 `.data`, `.rodata`, and `.bss` are known as static memory—allocated at the
-start of execution, and the *amount* of it stays constant throughout.
+start of execution, and the *amount of it* stays constant throughout.
 
 # Hello World
 
@@ -294,12 +318,13 @@ message:
 
 Now that you are somewhat experienced, navigate to the [opcode
 list][a64_opcodes], find `adr`, `add`, `sub`, `mov`, `svc`, and try your best
-to understand *the official* documentation, note that all instructions are 32
-bit long, consider ARM pseudo-code provided. Being able to read the official
+to understand the official documentation. Note that all instructions are 32-bit
+long, and consider ARM pseudo-code provided. Being able to read the official
 manuals is arguably the most important skill in terms of ARM assembly
-programming. Just try your best, it is fine if you do not understand most of it
-at first; develop the habit of consulting the official documentation rather
-than 3rd parties.
+programming. It is fine if you do not understand most of it at first; develop
+the habit of consulting the official documentation rather than 3rd parties. To
+learn reading the datasheets/documentation, the best approach is to try to find
+confirmation for what you already know at first.
 
 # Compiler & Assembler
 
@@ -368,8 +393,8 @@ does not bake in the absolute `message` address, it bakes the *distance* from
 
 ```asm
 // ...
-    // Add the offset, the distance to message label, to the current PC value
-    // to compute the absolute message label address at run time.
+	// Add the offset, the distance to message label, to the current PC value
+	// to compute the absolute message label address at run time.
 	adr x1, message
 	// ...
 
@@ -400,8 +425,7 @@ run
 
 Every time you invoke `run`, notice how the memory layout changes but the code
 is still able to reach the data. This is precisely because the encoded `adr`
-instruction stores the distance—not the location—from `adr` (from PC) to the
-data.
+instruction stores the distance—not the location—from `adr` to the data.
 
 Consider [`adr` encoding][a64_adr], 21 bytes `immlo:immhi` are used to encode
 the offset in bytes, which gives +/-1MiB range away from PC; too little
@@ -808,9 +832,9 @@ A: A32, A64, and T32 are ARM ISAs. The numbers in A32 and A64 correspond to
 general purpose register (`x0` ... `x30` in A64) sizes. Bigger registers in A64
 imply greater throughput (performance) and more addressable memory (bigger
 registers fit more addresses). ISAs also define how instructions are encoded.
-Both A32 and A64 instructions are 32 bit wide, whereas T32 allows mixed 16 and
-32 bit instruction sizes. Thumb is a previous version of T32, and Thumb-2 is an
-alias for T32. T32 is desired in microcontrollers where flash storage
+Both A32 and A64 instructions are 32-bit wide, whereas T32 allows mixed 16-bit
+and 32-bit instruction sizes. Thumb is a previous version of T32, and Thumb-2
+is an alias for T32. T32 is desired in microcontrollers where flash storage
 (non-volatile memory) is limited. Terms like ARMv8-A are architecuters; they
 define (not only) a subset of an ISA. The letters A, R, and M at the end define
 the [architecture profile.][arm_isaprofiles] [A single ARM CPU may be able to
@@ -876,6 +900,7 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [arm_isaprofiles]: https://www.arm.com/architecture/cpu
 [arm_learnpaths]: https://learn.arm.com/
 [arm_nomenclature]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/arm-fundamentals-introduction-to-understanding-arm-processors
+[battnotify_repo]: https://git.sr.ht/~kovmir/battnotify
 [binfmt_misc]: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
 [cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
 [make_guide]: https://makefiletutorial.com/
@@ -887,4 +912,3 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [systemd_nspawn1]: https://man.archlinux.org/man/systemd-nspawn.1
 [termux_android]: https://termux.dev/en/
 [termux_ssh]: https://wiki.termux.com/wiki/Remote_Access#SSH
-[battnotify_repo]: https://git.sr.ht/~kovmir/battnotify
