@@ -1,38 +1,40 @@
 # Prerequisites
 
-Basic C and Linux knowledge, any ARM computer with 64 bit Linux on board (like
-Raspberry Pi 3 and newer).
+Basic C and Linux knowledge is needed. If you can understand [this
+project][battnotify_repo] and you feel comfortable working with the terminal,
+that's enough.
+
+You also need any ARM computer with 64 bit Linux on board to run the code.
+Single-board computers like Raspberry Pi 3 and newer will do; you can even use
+your Android smartphone, as these are powered by ARM CPUs.
 
 <details>
-  <summary>Your Android smartphone will do...</summary>
+<summary>How to run the code on Android...</summary>
 
-  Android smartphones are powered by ARM CPUs, so you can use yours to run the
-  code in this article.
+Install [Termux][termux_android], [configure SSH][termux_ssh] so you can
+login from desktop computer, run `pkg install -y clang binutils`. You can
+proceed with the phone if `lscpu | head -n2` output in Termux looks like
+that:
 
-  Install [Termux][termux_android], [configure SSH][termux_ssh] so you can
-  login from desktop computer, run `pkg install -y clang binutils`. You can
-  proceed with the phone if `lscpu | head -n2` output in Termux looks like
-  that:
-
-  ```
-  Architecture:                            aarch64
-  CPU op-mode(s):                          64-bit
-  ```
+```
+Architecture:                            aarch64
+CPU op-mode(s):                          64-bit
+```
 </details>
 
 <details>
-  <summary>If you do not have an ARM computer...</summary>
+<summary>How to run the code on x86 desktop...</summary>
 
-  x86 Desktop Linux can emulate an ARM CPU. Install [QEMU][qemu_dl], then
-  download [Alpine Linux aarch64 mini root filesystem][alpine_dl] and extract
-  the archive. Run `sudo systemd-nspawn -D /path/to/alpine/rootfs /bin/ash`,
-  then run `apk add build-base` inside the container to install
-  GCC and the rest of the toolchain. See [systemd-nspawn(1)][systemd_nspawn1]
-  for details.
+x86 Desktop Linux can emulate an ARM CPU. Install [QEMU][qemu_dl], then
+download [Alpine Linux aarch64 mini root filesystem][alpine_dl] and extract
+the archive. Run `sudo systemd-nspawn -D /path/to/extracted/archive
+/bin/ash`, then run `apk add build-base` inside the container to install GCC
+and the rest of the toolchain. See [systemd-nspawn(1)][systemd_nspawn1] for
+details.
 
-  Linux kernel [binfmt][binfmt_misc] interface will detect the architecture of
-  the binary to be executed and hand it over to QEMU; that is why you can
-  chroot into an ARM rootfs.
+Linux kernel [binfmt][binfmt_misc] interface will detect the architecture of
+the binary to be executed and hand it over to QEMU automatically; that is why
+you can chroot into an ARM rootfs.
 </details>
 
 # Usage
@@ -885,3 +887,4 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [systemd_nspawn1]: https://man.archlinux.org/man/systemd-nspawn.1
 [termux_android]: https://termux.dev/en/
 [termux_ssh]: https://wiki.termux.com/wiki/Remote_Access#SSH
+[battnotify_repo]: https://git.sr.ht/~kovmir/battnotify
