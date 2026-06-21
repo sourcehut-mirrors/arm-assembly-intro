@@ -880,6 +880,7 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [man_gcc1]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
 [man_syscalls2]: https://man.archlinux.org/man/syscalls.2
 [qemu_dl]: https://www.qemu.org/download/#linux
+[rpi5_databrief]: https://pip-assets.raspberrypi.com/categories/892-raspberry-pi-5/documents/RP-008348-DS-6-raspberry-pi-5-product-brief.pdf
 [stm32_nucleo]: https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html
 [systemd_nspawn1]: https://man.archlinux.org/man/systemd-nspawn.1
 [termux_android]: https://termux.dev/en/
