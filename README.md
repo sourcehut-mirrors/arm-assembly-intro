@@ -831,7 +831,7 @@ and the number usually reflects performance relative to the other Cortex cores
 A: [Yes, it does.][arm_glossary]
 
 **Q: Why does GDB show cryptic instructions instead of `.ascii` string in
-`.data?` section?**
+`.data` section?**
 
 A: Disassembler does not distinguish between code and data; it tries to
 interpret data sections as code. There is a way to ask GDB disassembler to
