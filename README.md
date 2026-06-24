@@ -53,7 +53,7 @@ details.
 
 Linux kernel [binfmt][binfmt_misc] interface will detect the architecture of
 the binary to be executed and hand it over to QEMU automatically; that is why
-you can chroot into an ARM rootfs.
+you can chroot transparently into an ARM rootfs.
 </details>
 
 # Basics
