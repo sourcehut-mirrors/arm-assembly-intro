@@ -8,17 +8,14 @@ become obsolete.
 
 Most of the concepts taught are not ARM-specific but apply to other
 architectures. ARM is chosen as an example ISA because it is ubiquitous,
-arguably the most relevant architecture at the time of writing, and likely to
-remain relevant for the foreseeable future.
+arguably the most relevant architecture, and likely to remain relevant for the
+foreseeable future.
 
 # Usage
 
-This entire article is about practice from the very beginning. Reading the text
-is not enough. I write as little as possible and provide examples to illustrate
-each point. You should read the words, run the code, study the code, adjust the
-code, break the code and—this is crucial—observe the error messages. "Breaking
-the code" implies doing anything obviously silly, which is entirely up to your
-imagination. I will provide examples of how that can be done later in the text.
+This entire article is practice-focused from the very beginning. Reading the
+text is not enough—you should also run, study, adjust, and break the code.
+*Always observe the error messages.* I will provide examples of that later.
 
 # Prerequisites
 
