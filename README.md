@@ -1,12 +1,9 @@
 # Introduction
 
-Welcome to ARM assembly introduction for absolute beginners. This guide is
-meant to give you enough about ARM assembly programming for you to be able to
-figure out the rest yourself. This guide will not duplicate or try to
-substitute the official ARM documentation, but rather bridge the gap between
-beginners and the official sources. For instance, I will not talk about ARM
-SIMD programming because this topic is well covered by the official
-documentation. I will also not discuss things that are likely to change or
+Welcome to this beginner's introduction to ARM assembly. The goal is not to
+duplicate or replace the official ARM documentation, but to bridge the gap so
+you can navigate it confidently on your own. Topics already well-covered
+there—like SIMD programming—are skipped, as is anything likely to change or
 become obsolete.
 
 Most of the concepts taught are not ARM-specific but apply to other
