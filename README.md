@@ -25,7 +25,7 @@ terminal.
 
 You also need any ARM computer with 64-bit Linux on board to run the code.
 Single-board computers like Raspberry Pi 3 and newer will do; you can even use
-your Android smartphone, as these are powered by ARM CPUs.
+your Android smartphone, as most of these are powered by ARM CPUs.
 
 <details>
 <summary>How to run the code on Android...</summary>
