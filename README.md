@@ -310,6 +310,15 @@ message:
 	.ascii "Hello, ARM!\n"
 ```
 
+Now that you are somewhat experienced, navigate to the [opcode
+list][a64_opcodes], find `adr`, `add`, `sub`, `mov`, and `svc`, and try your
+best to understand the official documentation. It is fine if you do not
+understand most of it at first; try to find confirmation for what you already
+know. Note that all instructions are 32-bit long. Consider ARM pseudocode with
+C-like syntax and try to find its documentation yourself. Being able to read
+the official manuals is arguably the most important skill in ARM assembly
+programming.
+
 # Compiler & Assembler
 
 From [GCC compiler man page][man_gcc1]:
@@ -604,55 +613,6 @@ my_func:
 `bl` uses `x30` to save the return address; for this reason, `x30` is also
 referred to as the link register. There are many more branch instructions and
 the ones that update the status register; try to find and use them.
-
-Now that you are somewhat experienced, navigate to the [opcode
-list][a64_opcodes], find `adr`, `add`, `sub`, `mov`, and `svc`, and try your
-best to understand the official documentation. It is fine if you do not
-understand most of it at first; try to find confirmation for what you already
-know. Note that all instructions are 32-bit long. Consider ARM pseudocode with
-C-like syntax and try to find its documentation yourself. Being able to read
-the official manuals is arguably the most important skill in ARM assembly
-programming.
-
-<details>
-<summary>How to read opcode documentation...</summary>
-
-Consider [ADD (immediate) opcode][a64_addimm]:
-
-  ![ADD (immediate)](add_immediate.png)
-
-Red rectangles top to bottom:
-
-* **OPCODE DESCRIPTION** Everything except "optionally-shifted" should be
-  clear, I will explain this in a bit.
-* **OPCODE BINARY ENCODING** 12 bits 21-10 labeled as `imm12` are used to
-  encode the immediate (number literal) value. 2^12=4096 is the maximal
-  immediate that would fit into the instruction. If I try to compile `add x0,
-  x0, #5097`, it would fail with an error message: `helloworld.s:14: Error:
-  immediate out of range`. Note that each ARM instruction is 32-bit long and
-  that bits 30-22 are fixed, as they identify the instruction. `Rd` and `Rn`
-  bits identify the registers involved.
-* **INSTRUCTION SYNTAX** If 64-bit registers `x0`, `x1`, etc are used, then see
-  64-bit variant. `<Xd|SP>` means either `Xd` or `SP`. Curly braces `{}`
-  indicate optional arguments, they are not part of the syntax. The meaning of
-  these is in Assembler Symbols section.
-* **DECODING** An oversimplified CPU lifecycle consists of three steps: fetch,
-  decode, and execute. This ARM pseudocode describes exactly how the CPU
-  decodes the instruction: determine the registers involved, determine 32/64
-  bit encoding (not interesting for us), then bitwise shift by 12 to the left
-  if requested (that's what `{, <shift>}` is about).
-* **LEGEND** This is how you know `sh` indicates optional shift, and `Xd` is
-  the destination register. `<shift>` subsetion says addition with bitwise
-  shift looks like that: `add x1, x0, 5, lsl #12` (x1 = x0 + 5<<12).
-* **OPERATION** Explains what happens when the CPU executes the instruction.
-  Conditionals like `== 31` across the code handle cases where source or
-  destination registers are stack pointers. The immediate is 12 bits, so
-  `ZeroExtend` adds the remaininig zeroes to the left to make it a 64-bit
-  value. `AddWithCarry` performs the addition, `(result, -)` saves the result
-  and discards the carry. The last conditional assigns the result to the
-  register or stack.
-</details>
-
 
 # Calling Convention
 
