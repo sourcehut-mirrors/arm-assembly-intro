@@ -319,6 +319,12 @@ C-like syntax and try to find its documentation yourself. Being able to read
 the official manuals is arguably the most important skill in ARM assembly
 programming.
 
+[ADD (immediate)][a64_addimm] documentation reveals bits 10-21 (12 in total) of
+the instruction are used to encode the immediate (number literal). This gives a
+maximum value of 2^12 - 1 = 4095, i.e. `add x0, x1, #5093` will not work:
+
+![ADD (immediate)](addimm.png)
+
 # Compiler & Assembler
 
 From [GCC compiler man page][man_gcc1]:
