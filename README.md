@@ -13,48 +13,20 @@ foreseeable future.
 
 # Usage
 
-This entire article is practice-focused from the very beginning. Reading the
-text is not enough—you should also run, study, adjust, and break the code.
-*Always observe the error messages.* I will provide examples of that later.
+This article is hands-on from start to finish. Reading alone is not enough—you
+should also run, study, tweak, and break the code. I will show examples of how
+to do that later on. Pay close attention to error messages, and do not hesitate
+to re-read sections when something does not click.
 
 # Prerequisites
 
-Basic C and Linux knowledge is needed. You know enough if you can understand
-[this project][battnotify_repo] and you feel comfortable working with the
-terminal.
+Basic C and Linux knowledge is needed, and you must be able to set breakpoints
+and step through code in GDB. You know enough C and Linux if you can understand
+[this project][battnotify_repo] and feel comfortable working with the terminal.
 
 You also need any ARM computer with 64-bit Linux on board to run the code.
-Single-board computers like Raspberry Pi 3 and newer will do; you can even use
-your Android smartphone, as most of these are powered by ARM CPUs.
-
-<details>
-<summary>How to run the code on Android...</summary>
-
-Install [Termux][termux_android], [configure SSH][termux_ssh] so you can
-login from desktop computer, run `pkg install -y clang binutils`. You can
-proceed with the phone if `lscpu | head -n2` output in Termux looks like
-that:
-
-```
-Architecture:                            aarch64
-CPU op-mode(s):                          64-bit
-```
-</details>
-
-<details>
-<summary>How to run the code on x86 desktop...</summary>
-
-x86 Desktop Linux can emulate an ARM CPU. Install [QEMU][qemu_dl], then
-download [Alpine Linux aarch64 mini root filesystem][alpine_dl] and extract
-the archive. Run `sudo systemd-nspawn -D /path/to/extracted/archive
-/bin/ash`, then run `apk add build-base` inside the container to install GCC
-and the rest of the toolchain. See [systemd-nspawn(1)][systemd_nspawn1] for
-details.
-
-Linux kernel [binfmt][binfmt_misc] interface will detect the architecture of
-the binary to be executed and hand it over to QEMU automatically; that is why
-you can chroot transparently into an ARM rootfs.
-</details>
+Single-board computers like [ROCKPro64][rockpro64], [Raspberry Pi
+3/4/5][rpi_products], or [BPI-M5][bpim5] will do.
 
 # Basics
 
@@ -113,12 +85,8 @@ mov x8, #93
 mov x0, x2
 // Transfer the execution to the operating system.
 svc #666 // #666 has no effect, because Linux ignores this value.
-         // Even thought Linux ignores it, it has to be there as it is part of the instruction
+         // Even thought Linux ignores it, it has to be there as it is part of the instruction.
          // Other operating systems may somehow react to it.
-
-// FOR ANDROID USERS ONLY:
-// THE ABOVE CODE WILL NOT WORK IN TERMUX, BECAUSE IT LACKS `_start` SYMBOL.
-// READ FURTHER DOWN FOR DETAILS.
 ```
 
 Linux syscalls and their arguments are listed in [syscalls(2)][man_syscalls2],
@@ -310,6 +278,27 @@ message:
 	.ascii "Hello, ARM!\n"
 ```
 
+Compile the above code with `gcc -g -nostdlib /path/to/code.s -o helloworld`
+and start a GDB session with `gdb ./helloworld`. In the GDB session type:
+
+```
+layout asm
+break _start
+run
+```
+
+`adr` opcode loads the address where `"Hello, ARM!\n"` resides. If you follow
+the memory address next to the opcode, you can only see garbage. This is
+because the debugger (disassembler) does not distinguish between code and data
+in memory. In other words, the string is there, but the debugger tries to
+interpret it as code. In GDB prompt type `x/12c 0xaab5dfbd0264` (adjust
+address) to ask GDB to interpret 12 bytes starting from the given memory
+address as characters:
+
+![GNU Debugger Data Demo](gdb_data.png)
+
+# Reading Documentation
+
 Now that you are somewhat experienced, navigate to the [opcode
 list][a64_opcodes], find `adr`, `add`, `sub`, `mov`, and `svc`, and try your
 best to understand the official documentation. It is fine if you do not
@@ -377,7 +366,12 @@ address, and writes the result to the destination register.
 ```
 
 PC is Program Counter, it is a register that holds the address of the next
-instruction to be executed. An immediate value is a number literal (constant).
+instruction to be executed. Start a GDB session and see how PC register value
+changes every time you step through the code:
+
+![GNU Debugger PC Demo](gdb_pc.gif)
+
+An immediate value is a number literal (constant).
 During execution this instruction reads the current PC value and adds the
 immediate to it. This immediate is the *distance* in bytes to the given address
 from the current instruction (PC value).
@@ -422,50 +416,79 @@ run
 ...
 ```
 
+![GNU Debugger ASLR Demo](gdb_aslr.gif)
+
 Every time you invoke `run`, notice how the memory layout changes but the code
 is still able to reach the data. This is precisely because the encoded `adr`
-instruction stores the distance—not the location—from `adr` to the data.
+instruction stores the distance—not the location—from `adr` to the data. It
+looks like the address by `adr` changes, but actually doesn't; that's GDB
+resolving the absolute address for us. *This works because even though the
+memory addresses change, the relative distances across code and data is
+constant, i.e. the string is always the same distance away from `adr`.*
 
-Consider [`adr` encoding][a64_adr], 21 bytes `immlo:immhi` are used to encode
+Consider [`adr` encoding][a64_adr], 21 bytes `immhi:immlo` are used to encode
 the offset in bytes, which gives +/-1MiB range away from PC; too little
 sometimes. [`adrp` instruction][a64_adrp] allows PC-relative addressing
-+/-4GiB. `adrp` subdivides memory into 4KiB regions—called pages—and encodes
-the distance in the amount of 4KiB pages (not bytes, like `adr`):
++/-4GiB. `adrp` subdivides memory into 4KiB aligned regions—called pages—and
+encodes the distance in the amount of 4K pages (not bytes, like `adr`):
 
 ```asm
 // ...
-	// adrp takes current 64 bit PC value and sets 12 least significant
-	// bits to 0, this yields the address of the current (where adrp is)
-	// memory page.
-	//
-	// if PC == 0x55561c0701f4
-	// then
-	//   x1 = (0x55561c0701f4 << 12) + offset*4096
-	// end
-	//
-	// offset is the number of 4K pages, multiplied by the page size gives
-	// the number of bytes. This page offset is baked into the binary.
-	adrp x1, message
-	// Page addresses are 4K apart and aligned: they end in 12 zeroes.
-
-	// x1 now points to the *page* where the data resides, now we have to
-	// find the data *within* that page. The 12 least significant bits
-	// formely discarded by adrp are the offset within the page.
-	// :lo12: takes 12 least significant bits of the message (offset within
-	// the page) that is then added to x1 (page address).
-	//
-	// All in all message address may differ, but its distance from adrp
-	// does not.
-	add x1, x1, :lo12:message
-	// The aforementioned page address alignment is crucial for this to work.
+	adrp x1, message // x1 now points to the page with the data.
+	add x1, x1, :lo12:message // x1 now points to the data.
 
 .section .rodata
 message:
 	.ascii "Hello, ARM!\n"
 ```
 
+Here is a diagram to help you understand:
+
+```
+MEMORY:
+
+0xaab42a5f0000       0xaab42a5f1000       0xaab42a5f2000       0xaab42a5f3000
+|                    |                    |                    |          ^^^
+|        4096        |         4K         |         4K         |          |
+|<------------------>|<------------------>|<------------------>|        Aligned
+|                    |                    |  0x264             |
+|         adrp       |                    |<------->message:   |
+          ^                 Distance constant       ^
+          |                                         |
+          0xaab42a5f024c<-------------------------->0xaab42a5f2264
+
+ALGORITHM:
+
+adrp x1, message
+  0xaab42a5f024c                                (PC)
+  0xaab42a5f0000                                (Current page address)
+             ^^^
+  0xaab42a5f2000 = 0xaab42a5f0000 + 2*4096 = x1 (Message page address)
+            ^                       ^ offset
+
+add x1, x1, :lo12:message
+  0xaab42a5f2264 = 0xaab42a5f2000 + 0x264 = x1 (Message address)
+```
+
 Recompile `adrp` version of Hello World, and start a similar GDB session to
-verify position independence of this code.
+verify position independence of this code:
+
+![GNU Debugger ADRP Demo](gdb_adrp.gif)
+
+All `adrp` details come from the official ARM documentation:
+
+![ADRP](adrp.png)
+
+Notice that ARM gives instruction descriptions both in words and in pseudocode.
+The offset is split into two parts, `immhi` and `immlo`, which are then
+combined and shifted left by 12: `immhi::immlo::Zeros{12}`. Each left shift of
+a binary number is equivalent to multiplication by 2. `SignExtend` adds missing
+zeros on the left to make it a 64-bit value (preserving the sign).
+`PC64()[63:12]` means we take bits [63:12] from PC and discard the rest, then
+shift left by 12: `::Zeros{12}`. `X{64}(d) = base + imm` means we add the
+offset to PC and save the result in the 64-bit destination register. ARM
+pseudocode is documented as well, but most of it should be clear to a C
+programmer.
 
 # Stack
 
@@ -800,6 +823,11 @@ my_fact:
 [`cbz`][a64_cbz] is a conditional jump. `2f` refers to the label
 `2:` below, whereas `1b` refers to the label `1:` above.
 
+# Exercise
+
+Implement [strnlen(3)][strnlen3] from the standard C library in ARM assembly
+and call it from C code.
+
 # FAQ
 
 **Q: What is ARM?**
@@ -855,14 +883,6 @@ and the number usually reflects performance relative to the other Cortex cores
 
 A: [Yes, it does.][arm_glossary]
 
-**Q: Why does GDB show cryptic instructions instead of `.ascii` string in
-`.data` section?**
-
-A: Disassembler does not distinguish between code and data; it tries to
-interpret data sections as code. There is a way to ask GDB disassembler to
-interpret a memory region as data: `x/12c 0x4000078` command displays 12
-consecutive characters starting from `0x4000078`.
-
 **Q: How do I ask GCC to generate the assembler code from C?**
 
 A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
@@ -884,11 +904,11 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 ![Developed by human](human_dev.gif)
 
 [a64_addimm]: https://developer.arm.com/documentation/ddi0602/2026-03/Base-Instructions/ADD--immediate---Add-immediate-value-?lang=en
-[a64_adr]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/ADR--Form-PC-relative-address-?lang=en
-[a64_adrp]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en
-[a64_cbz]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/CBZ--Compare-and-branch-on-zero-?lang=en
+[a64_adr]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/ADR--Form-PC-relative-address-?lang=en
+[a64_adrp]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en
+[a64_cbz]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/CBZ--Compare-and-branch-on-zero-?lang=en
 [a64_ldrstr]: https://developer.arm.com/documentation/102374/0103/Loads-and-stores---addressing
-[a64_opcodes]: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions?lang=en
+[a64_opcodes]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions?lang=en
 [a64_pcs]: https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst#6the-base-procedure-call-standard
 [a64_stackusage]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/using-the-stack-in-aarch64-implementing-push-and-pop
 [a64_syscalls]: https://arm64.syscall.sh/
@@ -901,14 +921,13 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [arm_learnpaths]: https://learn.arm.com/
 [arm_nomenclature]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/arm-fundamentals-introduction-to-understanding-arm-processors
 [battnotify_repo]: https://git.sr.ht/~kovmir/battnotify
-[binfmt_misc]: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
+[bpim5]: https://docs.banana-pi.org/en/BPI-M5/BananaPi_BPI-M5
 [cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
 [make_guide]: https://makefiletutorial.com/
 [man_gcc1]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
 [man_syscalls2]: https://man.archlinux.org/man/syscalls.2
-[qemu_dl]: https://www.qemu.org/download/#linux
+[rockpro64]: https://pine64.org/devices/rockpro64/
 [rpi5_databrief]: https://pip-assets.raspberrypi.com/categories/892-raspberry-pi-5/documents/RP-008348-DS-6-raspberry-pi-5-product-brief.pdf
+[rpi_products]: https://www.raspberrypi.com/products/
 [stm32_nucleo]: https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html
-[systemd_nspawn1]: https://man.archlinux.org/man/systemd-nspawn.1
-[termux_android]: https://termux.dev/en/
-[termux_ssh]: https://wiki.termux.com/wiki/Remote_Access#SSH
+[strnlen3]: https://man.archlinux.org/man/strnlen.3
