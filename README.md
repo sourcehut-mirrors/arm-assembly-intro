@@ -429,8 +429,8 @@ instruction stores the distance—not the location—from `adr` to the data.
 Consider [`adr` encoding][a64_adr], 21 bytes `immlo:immhi` are used to encode
 the offset in bytes, which gives +/-1MiB range away from PC; too little
 sometimes. [`adrp` instruction][a64_adrp] allows PC-relative addressing
-+/-4GiB. `adrp` subdivides memory into 4KiB regons—called pages—and encodes the
-distance in the amount of 4KiB pages (not bytes, like `adr`):
++/-4GiB. `adrp` subdivides memory into 4KiB regions—called pages—and encodes
+the distance in the amount of 4KiB pages (not bytes, like `adr`):
 
 ```asm
 // ...
