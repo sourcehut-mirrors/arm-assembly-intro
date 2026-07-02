@@ -11,13 +11,6 @@ architectures. ARM is chosen as an example ISA because it is ubiquitous,
 arguably the most relevant architecture, and likely to remain relevant for the
 foreseeable future.
 
-# Usage
-
-This article is hands-on from start to finish. Reading alone is not enough—you
-should also run, study, tweak, and break the code. I will show examples of how
-to do that later on. Pay close attention to error messages, and do not hesitate
-to re-read sections when something does not click.
-
 # Prerequisites
 
 Basic C and Linux knowledge is needed, and you must be able to set breakpoints
@@ -70,10 +63,10 @@ particular list of instructions, a CPU cannot "exit" from anything. "Exit" has
 meaning to the OS: "take this process off the CPU's schedule." The same applies
 to things like file I/O, symlinks, chroot, dynamic memory allocation, etc.
 Whenever you ask something from the operating system, that means you are
-issuing a syscall (short for "system call"). Syscall #93 in Linux terminates
-the execution:
+issuing a syscall (short for "system call").
 
 ```asm
+// EXIT SYSCALL EXAMPLE
 mov x1, #7
 add x2, x1, #10
 
@@ -134,20 +127,22 @@ Compile and run again, the warning goes away.
 
 To truly understand what this is all about, try to break things; e.g. try to
 move `.global _start` or `_start:` and see what happens. [ADD
-(immediate)][a64_addimm] documentation reveals 12 bits of the instruction are
-used to encode the immediate (number literal). This gives a maximum value of
-2^12 - 1 = 4095, i.e. `add x0, x1, #5093` will not work:
+(immediate)][a64_addimm] documentation reveals 13 bits of the instruction are
+used to encode the immediate (number literal), which gives a maximum value of
+2^12 - 1 = 4095:
 
 ![ADD (immediate)](addimm.png)
+
+Try to assemble `add x0, x1, #5093`; see the error. Try `#4096`.
 
 ## Memory & Sections
 
 31 64-bit CPU registers are not enough to hold all the data, which
 is why we have memory. ARM instructions do not process data in memory directly;
-you must load the data into the registers first. Here is a modest
-load-from-memory example:
+you must load the data into the registers first.
 
 ```asm
+// LOAD FROM MEMORY EXAMPLE
 .global _start
 _start: // Global, marks where execution begins.
 	mov x8, #93
@@ -163,10 +158,11 @@ exit_code: // Not global, used internally.
 ```
 
 Assembly code can be subdivided into sections that reside in different memory
-regions and have different constraints applied to them; the data section cannot
-be executed, and the code section cannot be modified. Sectioned code example:
+regions and have different constraints applied to them: the data section cannot
+be executed, and the code section cannot be modified.
 
 ```asm
+// SECTIONED CODE EXAMPLE
 // Executable code resides in .text
 .section .text
 .global _start
@@ -186,6 +182,7 @@ exit_code:
 Try to write into `.rodata` memory address to see the program crash:
 
 ```asm
+// MODIFY RODATA SECTION SEGFAULT EXAMPLE
 // Executable code resides in .text
 .section .text
 .global _start
@@ -209,7 +206,7 @@ mydata:
 	.quad 15
 ```
 
-If you run the above code, it will crash due to `segmentation fault`, meaning
+If you run the above code, it will crash due to a segmentation fault, meaning
 the program accesses memory it is not allowed to access. Writing to `.rodata`
 is illegal.
 
@@ -217,6 +214,7 @@ Turn `.rodata` into `.data`, you can then modify the values held within
 the section:
 
 ```asm
+// WRITE INTO DATA SECTION EXAMPLE
 .section .text
 .global _start
 _start:
@@ -229,7 +227,7 @@ _start:
 	mov x0, #0
 	svc #0 // Exit
 
-.section .data // Not .rodata
+.section .data // Not .rodata; writing is legal.
 mydata:
 	.quad 15
 ```
@@ -238,9 +236,8 @@ mydata:
 uninitialized memory. `.bss` is a way to preallocate memory. These correspond
 to initialized and uninitialized global/static C variables.
 
-`.bss` section usage example:
-
 ```asm
+// BSS SECTION USAGE EXAMPLE
 	// ...
 	adr x1, buffer // Take buffer address.
 	mov x2, #0x41
@@ -263,7 +260,7 @@ start of execution, and the *amount of it* stays constant throughout.
 Now that you understand sections, you are ready to greet the World:
 
 ```asm
-// Hello World
+// ARM HELLO WORLD
 .section .text
 .global _start
 _start:
@@ -374,6 +371,7 @@ does not bake in the absolute `message` address, it bakes the *distance* from
 `adr` to `message` into the binary:
 
 ```asm
+// ADR USAGE EXAMPLE
 // ...
 	// Add the offset, the distance to message label, to the current PC value
 	// to compute the absolute message label address at run time.
@@ -422,6 +420,7 @@ sometimes. [`adrp` instruction][a64_adrp] allows PC-relative addressing
 encodes the distance in the amount of 4K pages (not bytes, like `adr`):
 
 ```asm
+// ADRP USAGE EXAMPLE
 // ...
 	adrp x1, message // x1 now points to the page with the data.
 	add x1, x1, :lo12:message // x1 now points to the data.
@@ -489,6 +488,7 @@ and static memory, the stack is available to hold temporary data. `sp` register
 holds the address of the top of the stack:
 
 ```asm
+// STACK USAGE EXAMPLE
 // Push onto stack (save data).
 mov x0, #42
 sub sp, sp, #16 // Subtract 16 bytes first; allocate memory.
@@ -521,6 +521,7 @@ ldr x1, [sp], #16 // Pop
 Run the following code, then try to misalign the stack, see what happens:
 
 ```asm
+// STACK MISALIGNMENT EXAMPLE
 .section .text
 .global _start
 
@@ -543,9 +544,10 @@ for more detailed examples.
 # Branching
 
 There are no C-like function calls in assembly; there are branch instructions
-to jump to different locations:
+to jump to different locations.
 
 ```asm
+// BRANCH EXAMPLE
 .section .text
 .global _start
 _start:
@@ -564,9 +566,10 @@ my_func:
 If `sub` instruction simply performs subtraction, `subs` subtracts and reports
 additional information about the outcome, such as whether the result is
 negative or zero. The same holds for `adds` and a few others. `subs` and the
-like report the result by setting the appropriate bit in `NZCV` register:
+like report the result by setting the appropriate bit in `NZCV` register.
 
 ```asm
+// SUBS AND CONDITIONAL BRANCHES USAGE EXAMPLE
 .section .text
 .global _start
 _start:
@@ -592,7 +595,7 @@ my_func:
 
 ```asm
 cmp x0, x1
-b.ne 1 // Branch if not 0, e.g. x0 != x1.
+b.ne 1 // Branch if Z (zero) flag is not set, i.e. x0 != x1.
 ```
 
 `NZCV` is not a general purpose register, so `mov` can't access it; use `mrs`
@@ -612,6 +615,7 @@ Save the return address to `x30` and branch, then get the address from `x30` to
 branch back:
 
 ```asm
+// FUNCTION CALLS EXAMPLE
 .section .text
 .global _start
 _start:
@@ -650,6 +654,7 @@ Procedure Call Standard (AAPCS64)][a64_pcs] for the remaining details.
 Here is a little demo to illustrate the concept:
 
 ```asm
+// ARM CALLING CONVENTION DEMO
 // Compile with `gcc /path/to/file.s`.
 .section .rodata
 msg:
@@ -801,6 +806,7 @@ clean:
 This is what a factorial function implementation would look like:
 
 ```asm
+// ARM FACTORIAL IMPLEMENTATION
 my_fact:
 	mov x0, #1 // x0 = result, start from 1
 	cbz x1, 2f // 0! == 1, return 1
@@ -904,14 +910,12 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [a64_pcs]: https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst#6the-base-procedure-call-standard
 [a64_stackusage]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/using-the-stack-in-aarch64-implementing-push-and-pop
 [a64_syscalls]: https://arm64.syscall.sh/
-[alpine_dl]: https://alpinelinux.org/downloads/
 [arm_archlearn]: https://www.arm.com/architecture/learn-the-architecture
 [arm_docs]: https://developer.arm.com/
 [arm_execstates]: https://developer.arm.com/documentation/102412/0103/Execution-and-Security-states/Execution-states
 [arm_glossary]: https://developer.arm.com/documentation/105565/200
 [arm_isaprofiles]: https://www.arm.com/architecture/cpu
 [arm_learnpaths]: https://learn.arm.com/
-[arm_nomenclature]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/arm-fundamentals-introduction-to-understanding-arm-processors
 [battnotify_repo]: https://git.sr.ht/~kovmir/battnotify
 [bpim5]: https://docs.banana-pi.org/en/BPI-M5/BananaPi_BPI-M5
 [cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
