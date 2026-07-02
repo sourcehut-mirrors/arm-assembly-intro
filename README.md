@@ -134,9 +134,9 @@ Compile and run again, the warning goes away.
 
 To truly understand what this is all about, try to break things; e.g. try to
 move `.global _start` or `_start:` and see what happens. [ADD
-(immediate)][a64_addimm] documentation reveals 12 bits (10-21) of the
-instruction are used to encode the immediate (number literal). This gives a
-maximum value of 2^12 - 1 = 4095, i.e. `add x0, x1, #5093` will not work:
+(immediate)][a64_addimm] documentation reveals 12 bits of the instruction are
+used to encode the immediate (number literal). This gives a maximum value of
+2^12 - 1 = 4095, i.e. `add x0, x1, #5093` will not work:
 
 ![ADD (immediate)](addimm.png)
 
