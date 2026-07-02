@@ -475,7 +475,7 @@ verify position independence of this code:
 
 ![GNU Debugger ADRP Demo](gdb_adrp.gif)
 
-All `adrp` details come from the official ARM documentation:
+All `adrp` details come from the [official ARM documentation][a64_adrp]:
 
 ![ADRP](adrp.png)
 
