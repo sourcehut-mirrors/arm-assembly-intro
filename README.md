@@ -132,7 +132,12 @@ _start:
 
 Compile and run again, the warning goes away. To truly understand what this is
 all about, try to break things; e.g., try to move `.global _start` or `_start:`
-and see what happens.
+and see what happens. [ADD (immediate)][a64_addimm] documentation reveals 12
+bits (10-21) of the instruction are used to encode the immediate (number
+literal). This gives a maximum value of 2^12 - 1 = 4095, i.e. `add x0, x1,
+#5093` will not work:
+
+![ADD (immediate)](addimm.png)
 
 ## Memory & Sections
 
@@ -296,23 +301,6 @@ address) to ask GDB to interpret 12 bytes starting from the given memory
 address as characters:
 
 ![GNU Debugger Data Demo](gdb_data.png)
-
-# Reading Documentation
-
-Now that you are somewhat experienced, navigate to the [opcode
-list][a64_opcodes], find `adr`, `add`, `sub`, `mov`, and `svc`, and try your
-best to understand the official documentation. It is fine if you do not
-understand most of it at first; try to find confirmation for what you already
-know. Note that all instructions are 32-bit long. Consider ARM pseudocode with
-C-like syntax and try to find its documentation yourself. Being able to read
-the official manuals is arguably the most important skill in ARM assembly
-programming.
-
-[ADD (immediate)][a64_addimm] documentation reveals bits 10-21 (12 in total) of
-the instruction are used to encode the immediate (number literal). This gives a
-maximum value of 2^12 - 1 = 4095, i.e. `add x0, x1, #5093` will not work:
-
-![ADD (immediate)](addimm.png)
 
 # Compiler & Assembler
 
