@@ -477,7 +477,10 @@ zeros on the left to make it a 64-bit value (preserving the sign).
 shift left by 12: `::Zeros{12}`. `X{64}(d) = base + imm` means we add the
 offset to PC and save the result in the 64-bit destination register. ARM
 pseudocode is documented as well, but most of it should be clear to a C
-programmer.
+programmer. A typical CPU lifecycle consists of three steps: fetch, decode, and
+execute instructions. The first pseudocode snippet explains what happens while
+the instruction is being decoded, and the second describes instruction
+execution.
 
 # Stack
 
