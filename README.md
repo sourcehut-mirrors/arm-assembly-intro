@@ -453,8 +453,8 @@ MEMORY:
 |<------------------>|<------------------>|<------------------>|        Aligned
 |                    |                    |  0x264             |
 |         adrp       |                    |<------->message:   |
-          ^                 Distance constant       ^
-          |                                         |
+          ^                                         ^
+          |                 Distance constant       |
           0xaab42a5f024c<-------------------------->0xaab42a5f2264
 
 ALGORITHM:
