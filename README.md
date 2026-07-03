@@ -239,7 +239,7 @@ it:
 
 ```asm
 // BSS SECTION USAGE EXAMPLE
-	// ...
+// ...
 	adr x1, buffer // Take buffer address.
 	mov x2, #0x41
 	str x2, [x1]   // Store x2 at [x1].
