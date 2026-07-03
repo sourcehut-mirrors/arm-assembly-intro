@@ -572,7 +572,8 @@ my_func:
 If `sub` instruction simply performs subtraction, `subs` subtracts and reports
 additional information about the outcome, such as whether the result is
 negative or zero. The same holds for `adds` and a few others. `subs` and the
-like report the result by setting the appropriate bit in `NZCV` register:
+like report the result by setting the appropriate bit in [`NZCV`
+register][nzcvreg]:
 
 ```asm
 // SUBS AND CONDITIONAL BRANCHES USAGE EXAMPLE
@@ -653,7 +654,9 @@ meaning of conditionals:
 
 ![ConditionHolds](conditionholds.png)
 
-[NZCV register page][nzcvreg] explains when the flags are set:
+`b.eq` branches when the Z flag is 1; `b.ne` does the opposite, i.e. it
+branches when Z is 0. It is the same with the others. [NZCV register
+page][nzcvreg] explains when the flags are set:
 
 ![NCZV Register](nzcv.png)
 
