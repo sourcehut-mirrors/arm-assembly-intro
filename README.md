@@ -341,8 +341,11 @@ clean:
 .PHONY: build gdb clean
 ```
 
-GCC may optimize (rewrite) your code, add `-O0` flag to prevent it. Using GCC
-is fine, just be aware of the underlying process.
+Using GCC is fine, just be aware of the underlying process. GCC may optimize
+(rewrite) your code, add `-O0` flag to prevent it.
+
+Apart from that you can ask GCC to rewrite C in assembly: `gcc -S -fverbose-asm
+/path/to/c/file.c -o /path/to/asm/file.s`.
 
 # Position Independent Executable
 
@@ -901,10 +904,6 @@ and the number usually reflects performance relative to the other Cortex cores
 **Q: Does ARM glossary exist?**
 
 A: [Yes, it does.][arm_glossary]
-
-**Q: How do I ask GCC to generate the assembler code from C?**
-
-A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 
 # Further Steps
 
