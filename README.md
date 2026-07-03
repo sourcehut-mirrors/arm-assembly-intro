@@ -139,7 +139,7 @@ Try to assemble `add x0, x1, #5093`; see the error. Try `#4096`.
 
 31 64-bit CPU registers are not enough to hold all the data, which
 is why we have memory. ARM instructions do not process data in memory directly;
-you must load the data into the registers first. Here is how:
+you must load the data into the registers first. Here is an example:
 
 ```asm
 // LOAD FROM MEMORY EXAMPLE
