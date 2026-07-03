@@ -668,7 +668,9 @@ pass arguments and return values to/from other functions, just like with
 syscalls. `x19` .. `x28` can be freely used, `x9` .. `x15` must be preserved.
 "Must be preserved" means you are free to use them, but make sure you restore
 the original values before the function return. Refer to [ARM Architecture
-Procedure Call Standard (AAPCS64)][a64_pcs] for the remaining details.
+Procedure Call Standard (AAPCS64)][a64_pcs] for the remaining details:
+
+![AAPCS64](aapcs64.png)
 
 Here is a little demo to illustrate the concept:
 
