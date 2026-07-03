@@ -63,7 +63,7 @@ particular list of instructions, a CPU cannot "exit" from anything. "Exit" has
 meaning to the OS: "take this process off the CPU's schedule." The same applies
 to things like file I/O, symlinks, chroot, dynamic memory allocation, etc.
 Whenever you ask something from the operating system, that means you are
-issuing a syscall (short for "system call").
+issuing a syscall (short for "system call"). Here is how to do it:
 
 ```asm
 // EXIT SYSCALL EXAMPLE
@@ -139,7 +139,7 @@ Try to assemble `add x0, x1, #5093`; see the error. Try `#4096`.
 
 31 64-bit CPU registers are not enough to hold all the data, which
 is why we have memory. ARM instructions do not process data in memory directly;
-you must load the data into the registers first.
+you must load the data into the registers first. Here is how:
 
 ```asm
 // LOAD FROM MEMORY EXAMPLE
@@ -159,7 +159,7 @@ exit_code: // Not global, used internally.
 
 Assembly code can be subdivided into sections that reside in different memory
 regions and have different constraints applied to them: the data section cannot
-be executed, and the code section cannot be modified.
+be executed, and the code section cannot be modified. Here is an example:
 
 ```asm
 // SECTIONED CODE EXAMPLE
@@ -234,7 +234,8 @@ mydata:
 
 `.data` section is for initialized memory, whereas `.bss` section is for
 uninitialized memory. `.bss` is a way to preallocate memory. These correspond
-to initialized and uninitialized global/static C variables.
+to initialized and uninitialized global/static C variables. Here is how to use
+it:
 
 ```asm
 // BSS SECTION USAGE EXAMPLE
@@ -315,7 +316,7 @@ code (e.g. resolves `#ifdef`s), compiler rewrites C into assembly, assembler
 encodes the assembly instructions in binary format, and the linker combines
 object files into an executable. Assembly code does not need preprocessing and
 compilation. In other words, there is no need to invoke GCC; you can run the
-assembler and linker manually:
+assembler and linker manually. Run these two commands:
 
 ```sh
 as -g -o helloworld.o helloworld.s
@@ -340,7 +341,8 @@ clean:
 .PHONY: build gdb clean
 ```
 
-Using GCC is fine, just be aware of the underlying process.
+GCC may optimize (rewrite) your code, add `-O0` flag to prevent it. Using GCC
+is fine, just be aware of the underlying process.
 
 # Position Independent Executable
 
@@ -463,7 +465,7 @@ verify position independence of this code:
 
 ![GNU Debugger ADRP Demo](gdb_adrp.gif)
 
-All `adrp` details come from the [official ARM documentation][a64_adrp]:
+All [`adrp`][a64_adrp] details come from the official ARM documentation:
 
 ![ADRP](adrp.png)
 
@@ -544,7 +546,8 @@ for more detailed examples.
 # Branching
 
 There are no C-like function calls in assembly; there are branch instructions
-to jump to different locations.
+to jump to different locations. Use `b` to branch (jump) to a different
+address:
 
 ```asm
 // BRANCH EXAMPLE
@@ -566,7 +569,7 @@ my_func:
 If `sub` instruction simply performs subtraction, `subs` subtracts and reports
 additional information about the outcome, such as whether the result is
 negative or zero. The same holds for `adds` and a few others. `subs` and the
-like report the result by setting the appropriate bit in `NZCV` register.
+like report the result by setting the appropriate bit in `NZCV` register:
 
 ```asm
 // SUBS AND CONDITIONAL BRANCHES USAGE EXAMPLE
@@ -598,8 +601,7 @@ cmp x0, x1
 b.ne 1 // Branch if Z (zero) flag is not set, i.e. x0 != x1.
 ```
 
-`NZCV` is not a general purpose register, so `mov` can't access it; use `mrs`
-and `msr` instead:
+`NZCV` is not a general purpose register, use `mrs` and `msr`:
 
 ```asm
 mrs x0, nzcv // Read from NZCV.
@@ -636,8 +638,25 @@ my_func:
 ```
 
 `bl` uses `x30` to save the return address; for this reason, `x30` is also
-referred to as the link register. There are many more branch instructions and
-the ones that update the status register; try to find and use them.
+referred to as the link register.
+
+Consider `b.eq` once again, EQ is not the only option, the pattern is
+[`b.CONDITION`][a64_bcond]:
+
+![B.cond](bcond.png)
+
+Click [`ConditionHolds`][condholds] to open the function definition and see the
+meaning of conditionals:
+
+![ConditionHolds](conditionholds.png)
+
+[NZCV register page][nzcvreg] explains when the flags are set:
+
+![NCZV Register](nzcv.png)
+
+You can ask online search engines to look specifically at ARM's website if you
+add `site:arm.com` to your request. Note that not all the documentation is
+available in HTML format; most of it is in PDF.
 
 # Calling Convention
 
@@ -901,9 +920,10 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 
 ![Developed by human](human_dev.gif)
 
-[a64_addimm]: https://developer.arm.com/documentation/ddi0602/2026-03/Base-Instructions/ADD--immediate---Add-immediate-value-?lang=en
+[a64_addimm]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/ADD--immediate---Add-immediate-value-?lang=en
 [a64_adr]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/ADR--Form-PC-relative-address-?lang=en
 [a64_adrp]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en
+[a64_bcond]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/B-cond--Branch-conditionally-?lang=en
 [a64_cbz]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions/CBZ--Compare-and-branch-on-zero-?lang=en
 [a64_ldrstr]: https://developer.arm.com/documentation/102374/0103/Loads-and-stores---addressing
 [a64_opcodes]: https://developer.arm.com/documentation/ddi0602/2026-06/Base-Instructions?lang=en
@@ -919,9 +939,11 @@ A: `gcc -S -fverbose-asm /path/to/c/file.c -o /path/to/asm/file.s`
 [battnotify_repo]: https://git.sr.ht/~kovmir/battnotify
 [bpim5]: https://docs.banana-pi.org/en/BPI-M5/BananaPi_BPI-M5
 [cc_byncnd40]: https://creativecommons.org/licenses/by-nc-nd/4.0/
+[condholds]: https://developer.arm.com/documentation/ddi0602/2026-06/Shared-Pseudocode/shared-functions-system?lang=en#func_ConditionHolds_1
 [make_guide]: https://makefiletutorial.com/
 [man_gcc1]: https://man.archlinux.org/man/gcc.1#DESCRIPTION
 [man_syscalls2]: https://man.archlinux.org/man/syscalls.2
+[nzcvreg]: https://developer.arm.com/documentation/ddi0601/2026-06/AArch64-Registers/NZCV--Condition-Flags?lang=en
 [rockpro64]: https://pine64.org/devices/rockpro64/
 [rpi5_databrief]: https://pip-assets.raspberrypi.com/categories/892-raspberry-pi-5/documents/RP-008348-DS-6-raspberry-pi-5-product-brief.pdf
 [rpi_products]: https://www.raspberrypi.com/products/
