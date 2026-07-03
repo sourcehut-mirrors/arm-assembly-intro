@@ -316,7 +316,7 @@ code (e.g. resolves `#ifdef`s), compiler rewrites C into assembly, assembler
 encodes the assembly instructions in binary format, and the linker combines
 object files into an executable. Assembly code does not need preprocessing and
 compilation. In other words, there is no need to invoke GCC; you can run the
-assembler and linker manually. Run these two commands:
+assembler and linker manually. Execute these two commands:
 
 ```sh
 as -g -o helloworld.o helloworld.s
