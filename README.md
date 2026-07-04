@@ -35,7 +35,7 @@ add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
 `x0`, `x1`, `x2` ... `x30` are places where we store data, very much like
 variables in C; they are called general purpose registers. `mov` places `7`
 into `x1` register, the hash sign indicates 7 is a number. `add` performs the
-addition, it adds 10 to the contents of `x1` and saves the result in `x2`.
+addition: it adds 10 to the contents of `x1` and saves the result in `x2`.
 
 We say `mov`, `add` ... are [opcodes][a64_opcodes] followed by operands,
 e.g., `add` opcode is followed by three operands: `x2`, `x1`, and `#10`. An
