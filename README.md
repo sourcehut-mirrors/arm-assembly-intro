@@ -344,8 +344,8 @@ clean:
 Using GCC is fine, just be aware of the underlying process. GCC may optimize
 (rewrite) your code, add `-O0` flag to prevent it.
 
-Apart from that you can ask GCC to rewrite C in assembly: `gcc -S -fverbose-asm
-/path/to/c/file.c -o /path/to/asm/file.s`.
+Also note you can ask GCC to rewrite C in assembly: `gcc -S -fverbose-asm
+/path/to/c/file.c`.
 
 # Position Independent Executable
 
