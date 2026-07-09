@@ -34,11 +34,11 @@ add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
 
 `x0`, `x1`, `x2` ... `x30` are places where we store data, very much like
 variables in C; they are called general purpose registers. `mov` places `7`
-into `x1` register, the hash sign indicates 7 is a number. `add` performs the
-addition: it adds 10 to the contents of `x1` and saves the result in `x2`.
+into `x1` register, the hash sign indicates 7 is a number. `add` adds 10 to the
+contents of `x1` and saves the result in `x2`.
 
-We say `mov`, `add` ... are [opcodes][a64_opcodes] followed by operands,
-e.g., `add` opcode is followed by three operands: `x2`, `x1`, and `#10`. An
+We say `mov` and `add` are [opcodes][a64_opcodes] followed by operands,
+e.g. `add` opcode is followed by three operands: `x2`, `x1`, and `#10`. An
 opcode, together with its operands, forms an instruction. In practice, the
 terms "opcode" and "instruction" are interchangeable.
 
@@ -58,12 +58,12 @@ random byte sequence causes `illegal hardware instruction` error.
 
 To fix the crash, we have to terminate the execution at the end of the program.
 There is no exit opcode, we have to ask the operating system to do it for us.
-The "exit" concept is nonexistent in assembly, because a CPU can only execute a
-particular list of instructions, a CPU cannot "exit" from anything. "Exit" has
+The exit concept is nonexistent in assembly, because a CPU can only execute a
+particular list of instructions, a CPU cannot "exit" from anything. Exit has
 meaning to the OS: "take this process off the CPU's schedule." The same applies
-to things like file I/O, symlinks, chroot, dynamic memory allocation, etc.
-Whenever you ask something from the operating system, that means you are
-issuing a syscall (short for "system call"). Here is how to do it:
+to file I/O, symlinks, chroot, dynamic memory allocation, etc. Whenever you ask
+something from the operating system, that means you are issuing a syscall
+(short for "system call"). Here is how to do it:
 
 ```asm
 // EXIT SYSCALL EXAMPLE
@@ -139,7 +139,7 @@ Try to assemble `add x0, x1, #5093`; see the error. Try `#4096`.
 
 31 64-bit CPU registers are not enough to hold all the data, which
 is why we have memory. ARM instructions do not process data in memory directly;
-you must load the data into the registers first. Here is an example:
+you must load the data into the registers first. Use `ldr` to load from memory:
 
 ```asm
 // LOAD FROM MEMORY EXAMPLE
@@ -295,9 +295,8 @@ run
 the memory address next to the opcode, you can only see garbage. This is
 because the debugger (disassembler) does not distinguish between code and data
 in memory. In other words, the string is there, but the debugger tries to
-interpret it as code. In GDB prompt type `x/12c 0xaab5dfbd0264` (adjust
-address) to ask GDB to interpret 12 bytes starting from the given memory
-address as characters:
+interpret it as code. In GDB prompt type `x/12c <memory_address>` to ask GDB to
+interpret 12 bytes starting from the given memory address as characters:
 
 ![GNU Debugger Data Demo](gdb_data.png)
 
@@ -316,7 +315,7 @@ code (e.g. resolves `#ifdef`s), compiler rewrites C into assembly, assembler
 encodes the assembly instructions in binary format, and the linker combines
 object files into an executable. Assembly code does not need preprocessing and
 compilation. In other words, there is no need to invoke GCC; you can run the
-assembler and linker manually. Execute these two commands:
+assembler and linker manually. Execute assembler and then linker:
 
 ```sh
 as -g -o helloworld.o helloworld.s
@@ -362,13 +361,13 @@ changes every time you step through the code:
 
 ![GNU Debugger PC Demo](gdb_pc.gif)
 
-An immediate value is a number literal (constant).
-During execution this instruction reads the current PC value and adds the
-immediate to it. This immediate is the *distance* in bytes to the given address
-from the current instruction (PC value).
+An immediate value is a number literal (constant). During execution this
+instruction reads the current PC value and adds the immediate to it. This
+immediate is the *distance* in bytes to the given address from the current
+instruction (PC value).
 
 If the assembler encodes the absolute memory address, the code must be loaded
-at that address every time it is executed; if you move the code, the fixed
+at that address every time it is executed. If you move the code, the fixed
 absolute address no longer points to the data.
 
 `adr` reads PC value and adds the distance to `message` in bytes. the assembler
@@ -413,7 +412,7 @@ run
 Every time you invoke `run`, notice how the memory layout changes but the code
 is still able to reach the data. This is precisely because the encoded `adr`
 instruction stores the distance—not the location—from `adr` to the data. It
-looks like the address by `adr` changes, but actually doesn't; that's GDB
+looks like the address next to `adr` changes, but actually doesn't; that's GDB
 resolving the absolute address for us. *This works because even though the
 memory addresses change, the relative distances across code and data is
 constant, i.e. the string is always the same distance away from `adr`.*
@@ -667,14 +666,13 @@ available in HTML format; most of it is in PDF.
 # Calling Convention
 
 For your code to interface with other people's code in C or assembly, everyone
-must follow the calling convention. You have to use `x8` for syscall numbers;
-that is part of the convention. You follow the convention placing a syscall
-number where the operating system expects to find it. `x0` .. `x7` are used to
-pass arguments and return values to/from other functions, just like with
-syscalls. `x19` .. `x28` can be freely used, `x9` .. `x15` must be preserved.
-"Must be preserved" means you are free to use them, but make sure you restore
-the original values before the function return. Refer to [ARM Architecture
-Procedure Call Standard (AAPCS64)][a64_pcs] for the remaining details:
+must follow the calling convention. You follow the convention placing a syscall
+number in `x8`, where the operating system expects to find it. `x0` ... `x7`
+are used to pass arguments and return values to/from other functions. `x19` ...
+`x28` can be freely used, `x9` ... `x15` must be preserved. "Must be preserved"
+means you are free to use them, but make sure you restore the original values
+before the function return. Refer to [ARM Architecture Procedure Call Standard
+(AAPCS64)][a64_pcs] for the remaining details:
 
 ![AAPCS64](aapcs64.png)
 
