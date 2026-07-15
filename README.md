@@ -14,8 +14,9 @@ foreseeable future.
 # Prerequisites
 
 Basic C and Linux knowledge is needed, and you must be able to set breakpoints
-and step through code in GDB. You know enough C and Linux if you can understand
-[this project][battnotify_repo] and feel comfortable working with the terminal.
+and step through code in GNU Debugger. You know enough C and Linux if you can
+understand [this project][battnotify_repo] and feel comfortable working with
+the terminal.
 
 You also need any ARM computer with 64-bit Linux on board to run the code.
 Single-board computers like [ROCKPro64][rockpro64], [Raspberry Pi
@@ -26,6 +27,7 @@ Single-board computers like [ROCKPro64][rockpro64], [Raspberry Pi
 This is how arithmetic works in ARM:
 
 ```asm
+// ARITHMETICS IN ARM
 // We add 10 to 7 and save the result.
 mov x1, #7       // Save 7 into register x1.
 add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
@@ -66,7 +68,7 @@ something from the operating system, that means you are issuing a syscall
 (short for "system call"). Here is how to do it:
 
 ```asm
-// EXIT SYSCALL EXAMPLE
+// EXIT SYSCALL DEMO
 mov x1, #7
 add x2, x1, #10
 
@@ -99,6 +101,7 @@ We have not specified where the code execution begins, so GCC has to guess. To
 prevent the guessing, add `_start:` where needed:
 
 ```asm
+// EXECUTION BEGINS UNDER _START LABEL
 _start:
 	mov x1, #7
 	add x2, x1, #10
@@ -112,6 +115,7 @@ If you recompile and run, the error does not go away. This is because `_start`
 has to be `.global` to be visible from outside of the program (to the OS):
 
 ```asm
+// _START LABEL MUST BE GLOBAL
 _start:
 	mov x1, #7
 	add x2, x1, #10
@@ -142,7 +146,7 @@ is why we have memory. ARM instructions do not process data in memory directly;
 you must load the data into the registers first. Use `ldr` to load from memory:
 
 ```asm
-// LOAD FROM MEMORY EXAMPLE
+// LOAD FROM MEMORY DEMO
 .global _start
 _start: // Global, marks where execution begins.
 	mov x8, #93
@@ -159,10 +163,11 @@ exit_code: // Not global, used internally.
 
 Assembly code can be subdivided into sections that reside in different memory
 regions and have different constraints applied to them: the data section cannot
-be executed, and the code section cannot be modified. Here is an example:
+be executed, and the code section cannot be modified. Here is how to declare
+sections:
 
 ```asm
-// SECTIONED CODE EXAMPLE
+// SECTIONED CODE DEMO
 // Executable code resides in .text
 .section .text
 .global _start
@@ -182,7 +187,7 @@ exit_code:
 Try to write into `.rodata` memory address to see the program crash:
 
 ```asm
-// MODIFY RODATA SECTION SEGFAULT EXAMPLE
+// MODIFY RODATA SECTION SEGFAULT DEMO
 // Executable code resides in .text
 .section .text
 .global _start
@@ -214,7 +219,7 @@ Turn `.rodata` into `.data`, you can then modify the values held within
 the section:
 
 ```asm
-// WRITE INTO DATA SECTION EXAMPLE
+// WRITE INTO DATA SECTION DEMO
 .section .text
 .global _start
 _start:
@@ -238,7 +243,7 @@ to initialized and uninitialized global/static C variables. Here is how to use
 it:
 
 ```asm
-// BSS SECTION USAGE EXAMPLE
+// BSS SECTION DEMO
 // ...
 	adr x1, buffer // Take buffer address.
 	mov x2, #0x41
@@ -315,7 +320,7 @@ code (e.g. resolves `#ifdef`s), compiler rewrites C into assembly, assembler
 encodes the assembly instructions in binary format, and the linker combines
 object files into an executable. Assembly code does not need preprocessing and
 compilation. In other words, there is no need to invoke GCC; you can run the
-assembler and linker manually. Execute assembler and then linker:
+assembler and linker manually. Execute these commands for the manual control:
 
 ```sh
 as -g -o helloworld.o helloworld.s
@@ -343,7 +348,7 @@ clean:
 Using GCC is fine, just be aware of the underlying process. GCC may optimize
 (rewrite) your code, add `-O0` flag to prevent it.
 
-Also note you can ask GCC to rewrite C in assembly: `gcc -S -fverbose-asm
+Also note you can ask GCC to rewrite your C in assembly: `gcc -S -fverbose-asm
 /path/to/c/file.c`.
 
 # Position Independent Executable
@@ -492,7 +497,7 @@ and static memory, the stack is available to hold temporary data. `sp` register
 holds the address of the top of the stack:
 
 ```asm
-// STACK USAGE EXAMPLE
+// STACK DEMO
 // Push onto stack (save data).
 mov x0, #42
 sub sp, sp, #16 // Subtract 16 bytes first; allocate memory.
@@ -513,6 +518,7 @@ multiples of 16. Here is the equivalent code, but simpler (read about [ARM
 addressing modes][a64_ldrstr] for details):
 
 ```asm
+// STACK ALLOCATION DEMO
 mov x0, #42
 // Though x0 is 8 bytes in size, by design we must allocate multiples of 16.
 str x0, [sp, #-16]! // Push
@@ -525,7 +531,7 @@ ldr x1, [sp], #16 // Pop
 Run the following code, then try to misalign the stack, see what happens:
 
 ```asm
-// STACK MISALIGNMENT EXAMPLE
+// STACK ALIGNMENT DEMO
 .section .text
 .global _start
 
@@ -552,7 +558,7 @@ to jump to different locations. Use `b` to branch (jump) to a different
 address:
 
 ```asm
-// BRANCH EXAMPLE
+// BRANCH DEMO
 .section .text
 .global _start
 _start:
@@ -575,7 +581,7 @@ like report the result by setting the appropriate bit in [`NZCV`
 register][nzcvreg]:
 
 ```asm
-// SUBS AND CONDITIONAL BRANCHES USAGE EXAMPLE
+// SUBS AND CONDITIONAL BRANCHES DEMO
 .section .text
 .global _start
 _start:
@@ -620,7 +626,7 @@ Save the return address to `x30` and branch, then get the address from `x30` to
 branch back:
 
 ```asm
-// FUNCTION CALLS EXAMPLE
+// FUNCTION CALLS DEMO
 .section .text
 .global _start
 _start:
