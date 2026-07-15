@@ -27,7 +27,7 @@ Single-board computers like [ROCKPro64][rockpro64], [Raspberry Pi
 This is how arithmetic works in ARM:
 
 ```asm
-// ARITHMETICS IN ARM
+// ARM ARITHMETICS DEMO
 // We add 10 to 7 and save the result.
 mov x1, #7       // Save 7 into register x1.
 add x2, x1, #10  // Add 10 to the contents of x1 and save the result in x2.
@@ -101,7 +101,7 @@ We have not specified where the code execution begins, so GCC has to guess. To
 prevent the guessing, add `_start:` where needed:
 
 ```asm
-// EXECUTION BEGINS UNDER _START LABEL
+// _START LABEL DEMO 1
 _start:
 	mov x1, #7
 	add x2, x1, #10
@@ -115,7 +115,7 @@ If you recompile and run, the error does not go away. This is because `_start`
 has to be `.global` to be visible from outside of the program (to the OS):
 
 ```asm
-// _START LABEL MUST BE GLOBAL
+// _START LABEL DEMO 2
 _start:
 	mov x1, #7
 	add x2, x1, #10
@@ -167,7 +167,7 @@ be executed, and the code section cannot be modified. Here is how to declare
 sections:
 
 ```asm
-// SECTIONED CODE DEMO
+// CODE SECTIONS DEMO
 // Executable code resides in .text
 .section .text
 .global _start
@@ -187,7 +187,7 @@ exit_code:
 Try to write into `.rodata` memory address to see the program crash:
 
 ```asm
-// MODIFY RODATA SECTION SEGFAULT DEMO
+// MODIFY READ-ONLY SECTION SEGFAULT DEMO
 // Executable code resides in .text
 .section .text
 .global _start
@@ -266,7 +266,7 @@ start of execution, and the *amount of it* stays constant throughout.
 Now that you understand sections, you are ready to greet the World:
 
 ```asm
-// ARM HELLO WORLD
+// ARM HELLO WORLD DEMO
 .section .text
 .global _start
 _start:
@@ -380,7 +380,7 @@ does not bake in the absolute `message` address, it bakes the *distance* from
 `adr` to `message` into the binary:
 
 ```asm
-// ADR USAGE EXAMPLE
+// ADR INSTRUCTION DEMO
 // ...
 	// Add the offset, the distance to message label, to the current PC value
 	// to compute the absolute message label address at run time.
@@ -429,7 +429,7 @@ sometimes. [`adrp` instruction][a64_adrp] allows PC-relative addressing
 encodes the distance in the amount of 4K pages (not bytes, like `adr`):
 
 ```asm
-// ADRP USAGE EXAMPLE
+// ADRP INSTRUCTION DEMO
 // ...
 	adrp x1, message // x1 now points to the page with the data.
 	add x1, x1, :lo12:message // x1 now points to the data.
@@ -497,7 +497,7 @@ and static memory, the stack is available to hold temporary data. `sp` register
 holds the address of the top of the stack:
 
 ```asm
-// STACK DEMO
+// STACK DEMO 1
 // Push onto stack (save data).
 mov x0, #42
 sub sp, sp, #16 // Subtract 16 bytes first; allocate memory.
@@ -518,7 +518,7 @@ multiples of 16. Here is the equivalent code, but simpler (read about [ARM
 addressing modes][a64_ldrstr] for details):
 
 ```asm
-// STACK ALLOCATION DEMO
+// STACK DEMO 2
 mov x0, #42
 // Though x0 is 8 bytes in size, by design we must allocate multiples of 16.
 str x0, [sp, #-16]! // Push
@@ -531,7 +531,7 @@ ldr x1, [sp], #16 // Pop
 Run the following code, then try to misalign the stack, see what happens:
 
 ```asm
-// STACK ALIGNMENT DEMO
+// STACK DEMO 3
 .section .text
 .global _start
 
@@ -558,7 +558,7 @@ to jump to different locations. Use `b` to branch (jump) to a different
 address:
 
 ```asm
-// BRANCH DEMO
+// BRANCHING DEMO
 .section .text
 .global _start
 _start:
@@ -606,6 +606,7 @@ my_func:
 `cmp` compares registers and reports to `NZCV` register in a similar fashion:
 
 ```asm
+// CMP INSTRUCTION DEMO
 cmp x0, x1
 b.ne 1 // Branch if Z (zero) flag is not set, i.e. x0 != x1.
 ```
@@ -613,6 +614,7 @@ b.ne 1 // Branch if Z (zero) flag is not set, i.e. x0 != x1.
 `NZCV` is not a general purpose register, use `mrs` and `msr`:
 
 ```asm
+// NZCV REGISTER ACCESS DEMO
 mrs x0, nzcv // Read from NZCV.
 msr nzcv, x0 // Write to NZCV.
 ```
@@ -837,7 +839,7 @@ clean:
 This is what a factorial function implementation would look like:
 
 ```asm
-// ARM FACTORIAL IMPLEMENTATION
+// ARM FACTORIAL DEMO
 my_fact:
 	mov x0, #1 // x0 = result, start from 1
 	cbz x1, 2f // 0! == 1, return 1
