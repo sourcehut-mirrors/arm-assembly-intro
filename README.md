@@ -899,7 +899,8 @@ the [architecture profile.][arm_isaprofiles] [A single ARM CPU may be able to
 execute instructions encoded in both A64 and A32. A CPU executing A64
 instructions operates in AArch64 execution state, while a CPU executing A32 or
 T32 instructions operates in AArch32.][arm_execstates] This whole time I have
-been talking about A64.
+been talking about A64. *This paragraph is oversimplified and technically
+inaccurate!*
 
 **Q: What is ARM Cortex?**
 
