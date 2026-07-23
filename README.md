@@ -676,11 +676,11 @@ available in HTML format; most of it is in PDF.
 For your code to interface with other people's code in C or assembly, everyone
 must follow the calling convention. You follow the convention placing a syscall
 number in `x8`, where the operating system expects to find it. `x0` ... `x7`
-are used to pass arguments and return values to/from other functions. `x19` ...
-`x28` can be freely used, `x9` ... `x15` must be preserved. "Must be preserved"
-means you are free to use them, but make sure you restore the original values
-before the function return. Refer to [ARM Architecture Procedure Call Standard
-(AAPCS64)][a64_pcs] for the remaining details:
+are used to pass arguments and return values to/from other functions. `x9` ...
+`x15` can be freely used, `x19` ... `x28` must be preserved. "Must be
+preserved" means you are free to use them, but make sure you restore the
+original values before the function return. Refer to [ARM Architecture
+Procedure Call Standard (AAPCS64)][a64_pcs] for the remaining details:
 
 ![AAPCS64](aapcs64.png)
 
@@ -729,7 +729,7 @@ main:
 	// x10 and x11 are corrupt at this point, restore their values from stack.
 	ldp x10, x11, [sp], #16
 
-	// x9 .. x15 must remain untouched after the function returns.
+	// x19 .. x28 must remain untouched after the function returns.
 
 	// Prepare the exit code.
 	// x0 holds the function return value by convention;
