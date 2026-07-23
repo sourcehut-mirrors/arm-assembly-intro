@@ -256,7 +256,7 @@ buffer:
 	.zero 8  // .allocate 8 byte in .bss (zero-initialized)
 ```
 
-Unlike `.data.`, `.bss` section cannot be given initial value except 0.
+Unlike `.data`, `.bss` section cannot be given initial value except 0.
 
 `.data`, `.rodata`, and `.bss` are known as static memory—allocated at the
 start of execution, and the *amount of it* stays constant throughout.
