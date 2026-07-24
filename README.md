@@ -894,14 +894,14 @@ desirable in microcontrollers, where [flash][wiki_nvm] is limited.
 
 **Q: What are ARMv6-M, ARMv8-A and the like?**
 
-Terms like ARMv8-A are architectures, these are ARM ISA subsets. The numbers
+A: Terms like ARMv8-A are architectures, these are ARM ISA subsets. The numbers
 refer to an ISA subset version. The letters A, R, and M at the end define the
-[architecture profile.][arm_isaprofiles]
+[architecture profile][arm_isaprofiles].
 
 **Q: What are AArch32 and AArch64?**
 
-A: An ARM CPU executing A64 instructions operates in AArch64 *execution state*,
-while an ARM CPU executing A32 or T32 instructions operates in
+A: [An ARM CPU executing A64 instructions operates in AArch64 *execution
+state*, while an ARM CPU executing A32 or T32 instructions operates in
 AArch32.][arm_execstates]
 
 **Q: What is ARM Cortex?**
