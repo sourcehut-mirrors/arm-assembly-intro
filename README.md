@@ -891,6 +891,7 @@ A: A32 and A64 are different ARM ISAs. This article covers A64.
 A: All A32 and A64 *instructions* are 32-bit wide, while T32 allows mixed 16
 and 32-bit instruction sizes. This is desirable in microcontrollers, where
 [flash][wiki_nvm] is limited. Other than that, T32 and A32 are very similar.
+Thumb and Thumb-2 are older names for T32.
 
 **Q: What are ARMv6-M, ARMv8-A and the like?**
 
