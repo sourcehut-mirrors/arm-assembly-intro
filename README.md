@@ -925,7 +925,7 @@ A: [Yes, it does.][arm_glossary]
 * Write programs in C and study the assembly code emitted by the compiler.
 * Learn to navigate the [official ARM documentation][arm_docs].
 * Read ARM's [Learn the Architecture Guides][arm_archlearn].
-* See ARM's [Learning Paths][arm_learnpaths]
+* See ARM's [Learning Paths][arm_learnpaths].
 * Visit [ARM Books page][arm_books].
 * Buy an [STM32 Nucleo board][stm32_nucleo] and get into ARM microcontroller
   programming.
