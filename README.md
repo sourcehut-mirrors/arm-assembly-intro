@@ -80,7 +80,7 @@ mov x8, #93
 mov x0, x2
 // Transfer the execution to the operating system.
 svc #666 // #666 has no effect, because Linux ignores this value.
-         // Even thought Linux ignores it, it has to be there as it is part of the instruction.
+         // Even though Linux ignores it, it has to be there as it is part of the instruction.
          // Other operating systems may somehow react to it.
 ```
 
@@ -608,7 +608,7 @@ my_func:
 ```asm
 // CMP INSTRUCTION DEMO
 cmp x0, x1
-b.ne 1 // Branch if Z (zero) flag is not set, i.e. x0 != x1.
+b.ne some_label // Branch if Z (zero) flag is not set, i.e. x0 != x1.
 ```
 
 `NZCV` is not a general purpose register, use `mrs` and `msr`:
@@ -841,6 +841,7 @@ This is what a factorial function implementation would look like:
 ```asm
 // ARM FACTORIAL DEMO
 my_fact:
+	mov x1, x0 // x0 will hold the return value
 	mov x0, #1 // x0 = result, start from 1
 	cbz x1, 2f // 0! == 1, return 1
 1:
