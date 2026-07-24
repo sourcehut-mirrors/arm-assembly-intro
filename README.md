@@ -865,51 +865,54 @@ and call it from C code.
 
 A: ARM is a public company.
 
-A: ARM is an Instruction Set Architecture (ISA), basically a [set of
-instructions][a64_opcodes]. x86 and RISC-V are alternative ISAs. "ARM CPU"
-means it has been designed to execute ARM instructions. This is one of the
-reasons you cannot compile a program for an x86 CPU, and execute it on an ARM
-CPU: the instruction sets are different.
+A: ARM is a *family* of Instruction Set Architectures (ISA). An ISA is
+basically a [set of instructions][a64_opcodes]. x86 and RISC-V are alternative
+ISA families.
 
 **Q: What is assembly/assembler?**
 
-A: Assembly is a set of direct CPU instructions such as [ARM][a64_opcodes] or
-x86 (also known as "assembly language").
+A: Assembly language/code is a set of direct CPU instructions such as the code
+snippets across this article.
 
-A: An assembler is a computer program that takes handwritten assembly files as
-input and encodes them in binary format.
+A: An assembler is a computer program that takes human-readable assembly code
+as input and encodes it in binary format the CPU can understand.
 
 **Q: What are 32-bit and 64-bit ARM CPUs?**
 
 A: Colloquial terms for ARM CPUs capable of executing A32 and A64 ISAs
 respectively.
 
-**Q: What are A32, A64, T32, Thumb, Thumb-2, AArch32, AArch64, ARMv6-M, ARMv8-A?**
+**Q: What are A32 and A64?**
 
-A: A32, A64, and T32 are ARM ISAs. The numbers in A32 and A64 correspond to
-general purpose register (`x0` ... `x30` in A64) sizes. Bigger registers in A64
-imply greater throughput (performance) and more addressable memory (bigger
-registers fit more addresses). ISAs also define how instructions are encoded.
-Both A32 and A64 instructions are 32-bit wide, whereas T32 allows mixed 16-bit
-and 32-bit instruction sizes. Thumb is a previous version of T32, and Thumb-2
-is an alias for T32. T32 is desired in microcontrollers where flash storage
-(non-volatile memory) is limited. Terms like ARMv8-A are architecuters; they
-define (not only) a subset of an ISA. The letters A, R, and M at the end define
-the [architecture profile.][arm_isaprofiles] [A single ARM CPU may be able to
-execute instructions encoded in both A64 and A32. A CPU executing A64
-instructions operates in AArch64 execution state, while a CPU executing A32 or
-T32 instructions operates in AArch32.][arm_execstates] This whole time I have
-been talking about A64. *This paragraph is oversimplified and technically
-inaccurate!*
+A: A32 and A64 are different ARM ISAs. This article covers A64.
+
+**Q: What are T32, Thumb, Thumb-2?**
+
+A: T32 is an ARM ISA very similar to A32. All A32 and A64 *instructions* are
+32-bit wide, while T32 allows mixed 16 and 32-bit instruction sizes. This is
+desirable in microcontrollers, where [flash][wiki_nvm] is limited.
+
+**Q: What are ARMv6-M, ARMv8-A and the like?**
+
+Terms like ARMv8-A are architectures, these are ARM ISA subsets. The numbers
+refer to an ISA subset version. The letters A, R, and M at the end define the
+[architecture profile.][arm_isaprofiles]
+
+**Q: What are AArch32 and AArch64?**
+
+A: An ARM CPU executing A64 instructions operates in AArch64 *execution state*,
+while an ARM CPU executing A32 or T32 instructions operates in
+AArch32.][arm_execstates]
 
 **Q: What is ARM Cortex?**
 
 A: Apart from the ISAs, ARM releases various CPU core specifications, or simply
-cores. ARM calls them Cortex cores. A core defines the ISA, its extensions,
-cache sizes, etc.; think of it as a CPU core blueprint. [Raspberry Pi 5 comes
-with four Cortex-A76 cores][rpi5_databrief]. The A refers to the ISA profile
-and the number usually reflects performance relative to the other Cortex cores
-(higher is faster).
+cores. Think of them as CPU core blueprints: an ARM Cortex core defines the
+ISA, its extensions, cache sizes, etc. [Raspberry Pi 5 comes with four
+Cortex-A76 cores][rpi5_databrief]. The A refers to the [ISA
+profile][arm_isaprofiles] and the number usually reflects performance relative
+to the other Cortex cores (higher is faster). [Cortex-A76 documentation]
+reveals it is an ARMv8-A CPU.
 
 **Q: Does ARM glossary exist?**
 
@@ -922,6 +925,7 @@ A: [Yes, it does.][arm_glossary]
 * Learn to navigate the [official ARM documentation][arm_docs].
 * Read ARM's [Learn the Architecture Guides][arm_archlearn].
 * See ARM's [Learning Paths][arm_learnpaths]
+* Visit [ARM Books page][arm_books].
 * Buy an [STM32 Nucleo board][stm32_nucleo] and get into ARM microcontroller
   programming.
 
@@ -942,6 +946,7 @@ A: [Yes, it does.][arm_glossary]
 [a64_stackusage]: https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/using-the-stack-in-aarch64-implementing-push-and-pop
 [a64_syscalls]: https://arm64.syscall.sh/
 [arm_archlearn]: https://www.arm.com/architecture/learn-the-architecture
+[arm_books]: https://www.arm.com/resources/education/books
 [arm_docs]: https://developer.arm.com/
 [arm_execstates]: https://developer.arm.com/documentation/102412/0103/Execution-and-Security-states/Execution-states
 [arm_glossary]: https://developer.arm.com/documentation/105565/200
@@ -960,3 +965,4 @@ A: [Yes, it does.][arm_glossary]
 [rpi_products]: https://www.raspberrypi.com/products/
 [stm32_nucleo]: https://www.st.com/en/evaluation-tools/stm32-nucleo-boards.html
 [strnlen3]: https://man.archlinux.org/man/strnlen.3
+[wiki_nvm]: https://en.wikipedia.org/wiki/Non-volatile_memory
