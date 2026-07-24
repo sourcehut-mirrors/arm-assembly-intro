@@ -888,9 +888,9 @@ A: A32 and A64 are different ARM ISAs. This article covers A64.
 
 **Q: What are T32, Thumb, Thumb-2?**
 
-A: T32 is an ARM ISA very similar to A32. All A32 and A64 *instructions* are
-32-bit wide, while T32 allows mixed 16 and 32-bit instruction sizes. This is
-desirable in microcontrollers, where [flash][wiki_nvm] is limited.
+A: All A32 and A64 *instructions* are 32-bit wide, while T32 allows mixed 16
+and 32-bit instruction sizes. This is desirable in microcontrollers, where
+[flash][wiki_nvm] is limited. Other than that, T32 and A32 are very similar.
 
 **Q: What are ARMv6-M, ARMv8-A and the like?**
 
@@ -911,8 +911,8 @@ cores. Think of them as CPU core blueprints: an ARM Cortex core defines the
 ISA, its extensions, cache sizes, etc. [Raspberry Pi 5 comes with four
 Cortex-A76 cores][rpi5_databrief]. The A refers to the [ISA
 profile][arm_isaprofiles] and the number usually reflects performance relative
-to the other Cortex cores (higher is faster). [Cortex-A76 documentation]
-reveals it is an ARMv8-A CPU.
+to the other Cortex cores (higher is faster). [Cortex-A76
+documentation][arm_cortexa76] reveals it is an ARMv8-A CPU.
 
 **Q: Does ARM glossary exist?**
 
@@ -947,6 +947,7 @@ A: [Yes, it does.][arm_glossary]
 [a64_syscalls]: https://arm64.syscall.sh/
 [arm_archlearn]: https://www.arm.com/architecture/learn-the-architecture
 [arm_books]: https://www.arm.com/resources/education/books
+[arm_cortexa76]: https://developer.arm.com/compute-ip/cortex-a76
 [arm_docs]: https://developer.arm.com/
 [arm_execstates]: https://developer.arm.com/documentation/102412/0103/Execution-and-Security-states/Execution-states
 [arm_glossary]: https://developer.arm.com/documentation/105565/200
